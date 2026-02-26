@@ -1,65 +1,94 @@
-import Image from "next/image";
+﻿import Link from "next/link";
+import AICounselor from "@/components/AICounselor";
+import { archiveDataset } from "@/lib/archiveData";
 
-export default function Home() {
+const topicIndex = [
+  { label: "Awards", href: "/archive#awards" },
+  { label: "Varsity Teams", href: "/archive#varsityTeams" },
+  { label: "Courses", href: "/archive#courseAnnouncements" },
+  { label: "Projects", href: "/archive#projects" },
+  { label: "Reports", href: "/archive#clubReports" },
+  { label: "Events", href: "/archive#schoolEvents" },
+  { label: "Publications", href: "/archive#publications" },
+  { label: "School Profiles", href: "/archive#schoolProfiles" },
+  { label: "Buildings", href: "/archive#buildingHistory" },
+  { label: "Alumni", href: "/archive#alumniProfiles" },
+  { label: "Grade Tasks", href: "/archive#gradeTasks" },
+];
+
+export default function HomePage() {
+  const totalItems = Object.values(archiveDataset).reduce(
+    (sum, items) => sum + items.length,
+    0,
+  );
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="px-4 py-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <section className="section-block border-l-4 border-l-[var(--accent)] p-8">
+          <p className="text-sm font-semibold text-[var(--accent)]">Official Information Hub</p>
+          <h1 className="mt-2 text-4xl font-black tracking-tight text-[var(--primary)]">
+            Find School Records Fast
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">
+            This archive is organized for direct lookup of awards, varsity teams, courses,
+            student projects, reports, event materials, publications, school profiles,
+            building history, alumni links, and grade-based tasks.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href="/archive"
+              className="bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
+            >
+              Open Full Archive
+            </Link>
+            <Link
+              href="/projects"
+              className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]"
+            >
+              Browse Projects
+            </Link>
+            <Link
+              href="/links"
+              className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]"
+            >
+              School Links
+            </Link>
+            <Link
+              href="/api/archive/search?q=school+profile"
+              className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]"
+            >
+              Search Profiles
+            </Link>
+          </div>
+
+          <p className="mt-4 text-xs font-medium text-[var(--muted)]">
+            {totalItems} records across {Object.keys(archiveDataset).length} archive sections.
+          </p>
+
+          <div className="mt-6 border-t border-[var(--border)] pt-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+              Topic Index
+            </p>
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+              {topicIndex.map((topic) => (
+                <Link
+                  key={topic.label}
+                  href={topic.href}
+                  className="text-sm font-semibold text-[var(--accent)]"
+                >
+                  {topic.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-[var(--border)] pt-6">
+          <AICounselor />
+        </section>
+      </div>
+    </main>
   );
 }
