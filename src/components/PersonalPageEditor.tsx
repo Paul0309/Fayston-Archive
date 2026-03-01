@@ -71,6 +71,10 @@ function formatBytes(value: number) {
   return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function formatIsoDate(value: string) {
+  return value.slice(0, 10);
+}
+
 export default function PersonalPageEditor({
   initialPayload,
   endpoint,
@@ -184,7 +188,7 @@ export default function PersonalPageEditor({
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="personal-layout">
       <section className="section-cover border border-[var(--border)] px-6 py-6">
         <p className="section-cover-kicker">Private Workspace</p>
         <div className="personal-page-top">
@@ -205,9 +209,9 @@ export default function PersonalPageEditor({
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.95fr)]">
-        <div className="grid gap-5">
-          <section className="section-block px-6 py-6">
+      <div className="personal-columns">
+        <div className="personal-main-stack">
+          <section className="section-block px-6 py-6 personal-surface">
             <div className="personal-section-head">
               <div>
                 <p className="section-cover-kicker">Profile</p>
@@ -225,7 +229,7 @@ export default function PersonalPageEditor({
               ) : null}
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="personal-form-grid">
               <label className="auth-field">
                 <span>Headline</span>
                 <input
@@ -327,7 +331,7 @@ export default function PersonalPageEditor({
             {error ? <p className="auth-error mt-4">{error}</p> : null}
           </section>
 
-          <section className="section-block px-6 py-6">
+          <section className="section-block px-6 py-6 personal-surface">
             <div className="personal-section-head">
               <div>
                 <p className="section-cover-kicker">Transcripts</p>
@@ -378,7 +382,7 @@ export default function PersonalPageEditor({
                         <div>
                           <p className="text-sm font-bold text-[var(--primary)]">{item.title}</p>
                           <p className="mt-1 text-xs text-[var(--muted)]">
-                            {item.originalName} | {formatBytes(item.sizeBytes)} | {new Date(item.createdAt).toLocaleDateString("en-CA")}
+                            {item.originalName} | {formatBytes(item.sizeBytes)} | {formatIsoDate(item.createdAt)}
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-3 text-sm font-semibold">
@@ -505,7 +509,7 @@ export default function PersonalPageEditor({
             </div>
           </section>
 
-          <section className="section-block px-6 py-6">
+          <section className="section-block px-6 py-6 personal-surface">
             <div className="personal-section-head">
               <div>
                 <p className="section-cover-kicker">Projects</p>
@@ -646,8 +650,8 @@ export default function PersonalPageEditor({
           </section>
         </div>
 
-        <aside className="grid gap-6">
-          <section className="section-block px-5 py-5">
+        <aside className="personal-side-stack">
+          <section className="section-block px-5 py-5 personal-surface">
             <p className="section-cover-kicker">Snapshot</p>
             <div className="mt-4 grid gap-3 text-sm text-[var(--muted)]">
               <div className="personal-stat">
@@ -681,7 +685,7 @@ export default function PersonalPageEditor({
             </div>
           </section>
 
-          <section className="section-block px-5 py-5">
+          <section className="section-block px-5 py-5 personal-surface">
             <p className="section-cover-kicker">Access</p>
             <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
               This page is private. Only the owner and users with the admin role can open or edit it.

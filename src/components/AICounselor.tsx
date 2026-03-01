@@ -75,8 +75,9 @@ export default function AICounselor() {
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
+      <form suppressHydrationWarning onSubmit={handleSubmit} className="mt-3 flex gap-2">
         <input
+          suppressHydrationWarning
           value={input}
           onChange={(event) => setInput(event.target.value)}
           className="flex-1 border border-[var(--border)] px-3 py-2 text-sm text-[var(--primary)] outline-none focus:ring-2 focus:ring-[var(--accent)]"

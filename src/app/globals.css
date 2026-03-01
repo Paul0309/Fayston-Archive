@@ -229,6 +229,35 @@ body::-webkit-scrollbar {
   gap: 1rem;
 }
 
+.personal-layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.personal-columns {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.9fr);
+  align-items: start;
+}
+
+.personal-main-stack,
+.personal-side-stack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.personal-surface {
+  box-shadow: 0 10px 24px rgba(11, 19, 43, 0.04);
+}
+
+.personal-form-grid {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.95rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .personal-meta {
   display: flex;
   flex-wrap: wrap;
@@ -843,6 +872,11 @@ body::-webkit-scrollbar {
 
 @media (max-width: 768px) {
   .archive-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .personal-columns,
+  .personal-form-grid {
     grid-template-columns: 1fr;
   }
 
