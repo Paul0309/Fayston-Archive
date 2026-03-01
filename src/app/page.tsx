@@ -1,7 +1,7 @@
 import Link from "next/link";
-import AICounselor from "@/components/AICounselor";
 import { archiveDataset } from "@/lib/archiveData";
 import { updatePosts } from "@/lib/updatesData";
+import HomeCounselorShell from "@/components/HomeCounselorShell";
 
 const topicIndex = [
   { label: "Awards", href: "/archive#awards" },
@@ -112,7 +112,7 @@ export default function HomePage() {
         </section>
 
         <section className="border-t border-[var(--border)] pt-6">
-          <AICounselor />
+          <HomeCounselorShell />
         </section>
 
         <section className="border-t border-[var(--border)] pt-6">
