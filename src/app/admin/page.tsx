@@ -9,13 +9,16 @@ export default function AdminPage() {
           <p className="section-cover-kicker">Internal Tools</p>
           <h1 className="mt-2 text-3xl font-black text-[var(--primary)]">Archive Admin</h1>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--muted)]">
-            Lightweight intake surface for data cleanup and mock submission formatting.
-            This page is intentionally simple until real auth and persistence are added.
+            Lightweight intake surface for both structured archive records and update posts.
+            This page remains intentionally simple until real auth and review queues are added.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold">
             <Link href="/archive" className="text-[var(--accent)]">
               Open archive
+            </Link>
+            <Link href="/updates" className="text-[var(--accent)]">
+              Open updates
             </Link>
             <Link href="/links" className="text-[var(--accent)]">
               Review school links

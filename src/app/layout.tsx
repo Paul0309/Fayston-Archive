@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Fayston School Archive",
-  description: "Official school archive for projects, awards, events, and publications.",
+  description: "Official school archive for projects, awards, events, publications, and editorial updates.",
 };
 
 export default function RootLayout({
@@ -37,6 +37,7 @@ export default function RootLayout({
               <nav className="nav-links" aria-label="Global">
                 <Link href="/" className="nav-link">Home</Link>
                 <Link href="/archive" className="nav-link">Archive</Link>
+                <Link href="/updates" className="nav-link">Updates</Link>
                 <Link href="/projects" className="nav-link">Projects</Link>
                 <Link href="/links" className="nav-link">Links</Link>
                 <Link href="/admin" className="nav-link">Admin</Link>
@@ -55,7 +56,7 @@ export default function RootLayout({
               <div>
                 <p className="font-semibold text-[var(--primary)]">Fayston Archive</p>
                 <p className="mt-1">
-                  Official school archive for records, profiles, and activity history.
+                  Official school archive for records, profiles, activity history, and editorial updates.
                 </p>
               </div>
 
@@ -77,14 +78,14 @@ export default function RootLayout({
                   <Link href="/archive" className="font-semibold text-[var(--accent)]">
                     Archive
                   </Link>
+                  <Link href="/updates" className="font-semibold text-[var(--accent)]">
+                    Updates
+                  </Link>
                   <Link href="/links" className="font-semibold text-[var(--accent)]">
                     School Links
                   </Link>
                   <Link href="/admin" className="font-semibold text-[var(--accent)]">
                     Admin
-                  </Link>
-                  <Link href="/api/archive" className="font-semibold text-[var(--accent)]">
-                    API
                   </Link>
                 </div>
               </div>

@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
-type IntakeType = "publication" | "schoolProfile" | "schoolLink";
+type IntakeType = "publication" | "schoolProfile" | "schoolLink" | "updatePost";
 
 interface SubmissionItem {
   id: string;
@@ -23,6 +23,7 @@ const templateByType: Record<IntakeType, string[]> = {
   publication: ["title", "issue", "publishDate", "fileUrl", "type"],
   schoolProfile: ["academicYear", "title", "summary", "fileUrl"],
   schoolLink: ["name", "type", "url", "note", "owner", "updatedAt"],
+  updatePost: ["title", "slug", "publishDate", "excerpt", "body"],
 };
 
 export default function AdminIntakePanel() {
@@ -129,11 +130,11 @@ export default function AdminIntakePanel() {
 
   return (
     <section className="section-cover border border-[var(--border)] px-6 py-6">
-      <p className="section-cover-kicker">Prisma Intake Desk</p>
+      <p className="section-cover-kicker">Editorial + Archive Intake</p>
       <h2 className="mt-2 text-2xl font-black text-[var(--primary)]">Admin Input Workflow</h2>
       <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--muted)]">
-        This intake surface now saves publication, school profile, and school link submissions
-        into Prisma-backed storage. Review states can be layered on next.
+        Use this panel for both structured archive submissions and the new updates layer.
+        Archive entries stay reference-oriented. Update posts stay reading-oriented.
       </p>
 
       <div className="mt-5 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -149,6 +150,7 @@ export default function AdminIntakePanel() {
                 <option value="publication">Publication</option>
                 <option value="schoolProfile">School Profile</option>
                 <option value="schoolLink">School Link</option>
+                <option value="updatePost">Update Post</option>
               </select>
             </label>
 
@@ -168,17 +170,25 @@ export default function AdminIntakePanel() {
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Student Handbook 2026"
+              placeholder={
+                type === "updatePost"
+                  ? "Why the archive needed an editorial layer"
+                  : "Student Handbook 2026"
+              }
               className="archive-filter-input w-full"
             />
           </label>
 
           <label className="text-sm">
-            <span className="mb-1 block font-semibold text-[var(--primary)]">Subtitle / Issue</span>
+            <span className="mb-1 block font-semibold text-[var(--primary)]">Subtitle / Issue / Slug</span>
             <input
               value={subtitle}
               onChange={(event) => setSubtitle(event.target.value)}
-              placeholder="v2026.1 or Week 07"
+              placeholder={
+                type === "updatePost"
+                  ? "why-archive-needs-editorial-layer"
+                  : "v2026.1 or Week 07"
+              }
               className="archive-filter-input w-full"
             />
           </label>
@@ -189,7 +199,7 @@ export default function AdminIntakePanel() {
               <input
                 value={owner}
                 onChange={(event) => setOwner(event.target.value)}
-                placeholder="Media Office"
+                placeholder={type === "updatePost" ? "Archive Team" : "Media Office"}
                 className="archive-filter-input w-full"
               />
             </label>
@@ -199,7 +209,11 @@ export default function AdminIntakePanel() {
               <input
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
-                placeholder="/files/student-handbook-2026.pdf"
+                placeholder={
+                  type === "updatePost"
+                    ? "/updates/new-post-slug"
+                    : "/files/student-handbook-2026.pdf"
+                }
                 className="archive-filter-input w-full"
               />
             </label>
@@ -211,7 +225,11 @@ export default function AdminIntakePanel() {
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               rows={5}
-              placeholder="Describe what changed, upload source, or verification notes."
+              placeholder={
+                type === "updatePost"
+                  ? "Write the teaser, body draft, or related archive links."
+                  : "Describe what changed, upload source, or verification notes."
+              }
               className="archive-filter-input w-full resize-y"
             />
           </label>

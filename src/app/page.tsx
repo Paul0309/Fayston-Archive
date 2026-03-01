@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AICounselor from "@/components/AICounselor";
 import { archiveDataset } from "@/lib/archiveData";
+import { updatePosts } from "@/lib/updatesData";
 
 const topicIndex = [
   { label: "Awards", href: "/archive#awards" },
@@ -37,34 +38,19 @@ export default function HomePage() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/archive"
-              className="bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
-            >
+            <Link href="/archive" className="bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white">
               Open Full Archive
             </Link>
-            <Link
-              href="/projects"
-              className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]"
-            >
+            <Link href="/updates" className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]">
+              Read Updates
+            </Link>
+            <Link href="/projects" className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]">
               Browse Projects
             </Link>
-            <Link
-              href="/links"
-              className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]"
-            >
+            <Link href="/links" className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]">
               School Links
             </Link>
-            <Link
-              href="/api/archive/search?q=school+profile"
-              className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]"
-            >
-              Search Profiles
-            </Link>
-            <Link
-              href="/admin"
-              className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]"
-            >
+            <Link href="/admin" className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]">
               Admin Intake
             </Link>
           </div>
@@ -79,15 +65,49 @@ export default function HomePage() {
             </p>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
               {topicIndex.map((topic) => (
-                <Link
-                  key={topic.label}
-                  href={topic.href}
-                  className="text-sm font-semibold text-[var(--accent)]"
-                >
+                <Link key={topic.label} href={topic.href} className="text-sm font-semibold text-[var(--accent)]">
                   {topic.label}
                 </Link>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="border-t border-[var(--border)] pt-6">
+          <div className="flex items-end justify-between gap-4 border-b border-[var(--border)] pb-4">
+            <div>
+              <p className="section-cover-kicker">Latest Updates</p>
+              <h2 className="mt-2 text-2xl font-black text-[var(--primary)]">What Changed Recently</h2>
+            </div>
+            <Link href="/updates" className="text-sm font-semibold text-[var(--accent)]">
+              View all updates
+            </Link>
+          </div>
+
+          <div className="mt-5 grid gap-5 lg:grid-cols-3">
+            {updatePosts.slice(0, 3).map((post) => (
+              <article key={post.slug} className="section-cover section-cover-subtle px-5 py-5">
+                <p className="section-cover-kicker">{post.coverLabel}</p>
+                <h3 className="mt-2 text-xl font-black text-[var(--primary)]">
+                  <Link href={`/updates/${post.slug}`}>{post.title}</Link>
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{post.excerpt}</p>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-[var(--muted)]">
+                  <span>{post.publishDate}</span>
+                  <span>{post.author}</span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+                  <Link href={`/updates/${post.slug}`} className="text-[var(--accent)]">
+                    Read post
+                  </Link>
+                  {post.relatedLinks[0] ? (
+                    <Link href={post.relatedLinks[0].href} className="text-[var(--accent)]">
+                      {post.relatedLinks[0].label}
+                    </Link>
+                  ) : null}
+                </div>
+              </article>
+            ))}
           </div>
         </section>
 
