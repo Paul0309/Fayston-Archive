@@ -25,6 +25,7 @@ model IntakeSubmission {
 
 model User {
   id            String    @id @default(cuid())
+  role          String    @default("USER")
   name          String?
   username      String?   @unique
   email         String?   @unique
@@ -36,6 +37,52 @@ model User {
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
+  personalPage  PersonalPage?
+}
+
+model PersonalPage {
+  id             String           @id @default(cuid())
+  userId         String           @unique
+  headline       String?
+  bio            String?
+  graduationYear String?
+  transcriptNote String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transcripts    TranscriptItem[]
+  projects       PrivateProject[]
+}
+
+model TranscriptItem {
+  id        String       @id @default(cuid())
+  pageId    String
+  term      String
+  course    String
+  grade     String
+  notes     String?
+  sortOrder Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  page      PersonalPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, sortOrder])
+}
+
+model PrivateProject {
+  id        String       @id @default(cuid())
+  pageId    String
+  title     String
+  year      String?
+  summary   String
+  link      String?
+  status    String?
+  sortOrder Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  page      PersonalPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, sortOrder])
 }
 
 model Account {

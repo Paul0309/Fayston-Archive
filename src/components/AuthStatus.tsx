@@ -21,6 +21,7 @@ export default function AuthStatus() {
 
   return (
     <div className="auth-nav">
+      <Link href="/me" className="nav-link">My Page</Link>
       <span className="auth-nav-user">
         {session.user.name ?? session.user.username ?? session.user.email}
       </span>

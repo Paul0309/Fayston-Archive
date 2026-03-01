@@ -43,6 +43,7 @@ export default function RootLayout({
                   <Link href="/updates" className="nav-link">Updates</Link>
                   <Link href="/projects" className="nav-link">Projects</Link>
                   <Link href="/links" className="nav-link">Links</Link>
+                  <Link href="/me" className="nav-link">My Page</Link>
                   <Link href="/admin" className="nav-link">Admin</Link>
                   <Link href="/api/archive" className="nav-link">API</Link>
                 </nav>

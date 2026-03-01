@@ -18,7 +18,7 @@ export default function LoginForm() {
       identifier,
       password,
       redirect: true,
-      callbackUrl: "/admin",
+      callbackUrl: "/me",
     });
 
     if (result?.error) {

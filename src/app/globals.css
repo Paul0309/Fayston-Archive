@@ -220,6 +220,37 @@ body::-webkit-scrollbar {
   text-align: left;
 }
 
+.personal-page-top,
+.personal-section-head,
+.personal-stat {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.personal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.personal-meta span {
+  border: 1px solid var(--border);
+  background: white;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.personal-card-grid {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, white 98%, var(--accent) 2%);
+  padding: 1rem;
+}
+
 .archive-sidebar-now {
   display: inline-block;
   border: 1px solid var(--border);
@@ -802,6 +833,16 @@ body::-webkit-scrollbar {
 @media (max-width: 768px) {
   .archive-filter-grid {
     grid-template-columns: 1fr;
+  }
+
+  .personal-page-top,
+  .personal-section-head,
+  .personal-stat {
+    display: block;
+  }
+
+  .personal-meta {
+    justify-content: flex-start;
   }
 
   .archive-header-stats,

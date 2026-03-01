@@ -38,7 +38,7 @@ export default function SignupForm() {
       identifier: form.email,
       password: form.password,
       redirect: true,
-      callbackUrl: "/admin",
+      callbackUrl: "/me",
     });
   }
 

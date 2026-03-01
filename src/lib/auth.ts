@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { normalizeIdentity, resolveUserRole } from "@/lib/roles";
 
 const providers: NextAuthOptions["providers"] = [];
 
@@ -44,7 +45,7 @@ providers.push(
       password: { label: "Password", type: "password" },
     },
     async authorize(credentials) {
-      const identifier = credentials?.identifier?.trim().toLowerCase();
+      const identifier = normalizeIdentity(credentials?.identifier);
       const password = credentials?.password ?? "";
 
       if (!identifier || !password) return null;
@@ -65,6 +66,7 @@ providers.push(
         name: user.name,
         email: user.email,
         image: user.image,
+        role: user.role,
         username: user.username,
         phone: user.phone,
       };
@@ -82,9 +84,30 @@ export const authOptions: NextAuthOptions = {
   },
   providers,
   callbacks: {
+    async signIn({ user }) {
+      if (!user.id) {
+        return true;
+      }
+
+      const role = resolveUserRole({
+        email: user.email,
+        username: (user as { username?: string | null }).username ?? null,
+      });
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { role },
+      });
+
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
+        token.role = (user as { role?: string | null }).role ?? resolveUserRole({
+          email: user.email,
+          username: (user as { username?: string | null }).username ?? null,
+        });
         token.username = (user as { username?: string | null }).username ?? null;
         token.phone = (user as { phone?: string | null }).phone ?? null;
       }
@@ -93,6 +116,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
+        session.user.role = (token.role as string | null | undefined) ?? "USER";
         session.user.username = (token.username as string | null | undefined) ?? null;
         session.user.phone = (token.phone as string | null | undefined) ?? null;
       }

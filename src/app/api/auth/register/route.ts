@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { normalizeIdentity, resolveUserRole } from "@/lib/roles";
 
 interface RegisterBody {
   name?: string;
@@ -18,9 +19,9 @@ function clean(value?: string) {
 export async function POST(request: Request) {
   const body = (await request.json()) as RegisterBody;
   const name = clean(body.name);
-  const username = clean(body.username)?.toLowerCase();
-  const email = clean(body.email)?.toLowerCase();
-  const phone = clean(body.phone)?.toLowerCase();
+  const username = normalizeIdentity(clean(body.username));
+  const email = normalizeIdentity(clean(body.email));
+  const phone = normalizeIdentity(clean(body.phone));
   const password = body.password ?? "";
 
   if (!name || !username || !email || !phone || password.length < 8) {
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const role = resolveUserRole({ email, username });
 
   const user = await prisma.user.create({
     data: {
@@ -56,6 +58,7 @@ export async function POST(request: Request) {
       username,
       email,
       phone,
+      role,
       passwordHash,
     },
     select: {

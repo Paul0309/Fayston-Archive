@@ -19,7 +19,7 @@ export default function SocialLoginButtons({ providers }: { providers: SocialPro
           key={provider.id}
           type="button"
           className="social-login-button"
-          onClick={() => signIn(provider.id, { callbackUrl: "/admin" })}
+          onClick={() => signIn(provider.id, { callbackUrl: "/me" })}
         >
           {provider.label}
         </button>

@@ -3,11 +3,15 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import AdminIntakePanel from "@/components/AdminIntakePanel";
 import { authOptions } from "@/lib/auth";
+import { isAdminRole } from "@/lib/roles";
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/login");
+  }
+  if (!isAdminRole(session.user.role)) {
+    redirect("/me");
   }
 
   return (
@@ -33,6 +37,9 @@ export default async function AdminPage() {
             </Link>
             <Link href="/request-update" className="text-[var(--accent)]">
               View correction intake
+            </Link>
+            <Link href="/me" className="text-[var(--accent)]">
+              Open my private page
             </Link>
           </div>
         </header>
