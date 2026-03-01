@@ -1,4 +1,4 @@
-import {
+﻿import {
   archiveDataset,
   type ArchiveProject,
   type ArchiveSection,
@@ -160,27 +160,27 @@ export function getArchiveItemTitle(section: ArchiveSection, item: ArchiveRecord
 export function getArchiveItemEyebrow(section: ArchiveSection, item: ArchiveRecord): string | undefined {
   switch (section) {
     case "projects":
-      return `${(item as ArchiveProject).category} · ${(item as ArchiveProject).projectYear}`;
+      return `${(item as ArchiveProject).category} | ${(item as ArchiveProject).projectYear}`;
     case "awards":
-      return `${formatArchiveDate((item as Award).awardDate)} · ${(item as Award).level}`;
+      return `${formatArchiveDate((item as Award).awardDate)} | ${(item as Award).level}`;
     case "varsityTeams":
-      return `${(item as VarsityTeam).sportType} · Coach ${(item as VarsityTeam).coach}`;
+      return `${(item as VarsityTeam).sportType} | Coach ${(item as VarsityTeam).coach}`;
     case "courseAnnouncements":
-      return `${(item as CourseAnnouncement).courseCode} · ${(item as CourseAnnouncement).department}`;
+      return `${(item as CourseAnnouncement).courseCode} | ${(item as CourseAnnouncement).department}`;
     case "clubReports":
-      return `${(item as ClubReport).organization} · ${(item as ClubReport).period}`;
+      return `${(item as ClubReport).organization} | ${(item as ClubReport).period}`;
     case "schoolEvents":
-      return `${(item as SchoolEvent).type === "upcoming" ? "Upcoming" : "Past"} · ${formatArchiveDate((item as SchoolEvent).eventDate)}`;
+      return `${(item as SchoolEvent).type === "upcoming" ? "Upcoming" : "Past"} | ${formatArchiveDate((item as SchoolEvent).eventDate)}`;
     case "publications":
-      return `${(item as Publication).type === "student-handbook" ? "Student Handbook" : "Weekly Letter"} · ${(item as Publication).issue}`;
+      return `${(item as Publication).type === "student-handbook" ? "Student Handbook" : "Weekly Letter"} | ${(item as Publication).issue}`;
     case "schoolProfiles":
       return (item as SchoolProfile).academicYear;
     case "buildingHistory":
-      return `${(item as BuildingHistory).changeType} · ${(item as BuildingHistory).timelineYear}`;
+      return `${(item as BuildingHistory).changeType} | ${(item as BuildingHistory).timelineYear}`;
     case "alumniProfiles":
-      return `${(item as AlumniProfile).graduationYear} · ${(item as AlumniProfile).major}`;
+      return `${(item as AlumniProfile).graduationYear} | ${(item as AlumniProfile).major}`;
     case "gradeTasks":
-      return `${(item as GradeTask).grade} · ${formatArchiveDate((item as GradeTask).dueDate)}`;
+      return `${(item as GradeTask).grade} | ${formatArchiveDate((item as GradeTask).dueDate)}`;
   }
 }
 
@@ -207,32 +207,64 @@ export function getArchiveItemSummary(section: ArchiveSection, item: ArchiveReco
     case "alumniProfiles":
       return (item as AlumniProfile).currentRole;
     case "gradeTasks":
-      return `${(item as GradeTask).owner} · ${(item as GradeTask).status}`;
+      return `${(item as GradeTask).owner} | ${(item as GradeTask).status}`;
   }
 }
 
 export function getArchiveItemKeywords(section: ArchiveSection, item: ArchiveRecord): string[] {
   switch (section) {
     case "projects":
-      return [(item as ArchiveProject).category, (item as ArchiveProject).status, ...(item as ArchiveProject).tags].slice(0, 4);
+      return [
+        (item as ArchiveProject).category,
+        (item as ArchiveProject).status,
+        ...(item as ArchiveProject).tags,
+      ].slice(0, 4);
     case "awards":
       return [(item as Award).level, (item as Award).category, (item as Award).organizer].slice(0, 4);
     case "varsityTeams":
-      return [(item as VarsityTeam).sportType, (item as VarsityTeam).coach, ...((item as VarsityTeam).achievements.slice(0, 2))];
+      return [
+        (item as VarsityTeam).sportType,
+        (item as VarsityTeam).coach,
+        ...(item as VarsityTeam).achievements.slice(0, 2),
+      ];
     case "courseAnnouncements":
-      return [(item as CourseAnnouncement).semester, (item as CourseAnnouncement).department, (item as CourseAnnouncement).courseCode];
+      return [
+        (item as CourseAnnouncement).semester,
+        (item as CourseAnnouncement).department,
+        (item as CourseAnnouncement).courseCode,
+      ];
     case "clubReports":
-      return [(item as ClubReport).organization, (item as ClubReport).period, ...(item as ClubReport).leaders.slice(0, 2)];
+      return [
+        (item as ClubReport).organization,
+        (item as ClubReport).period,
+        ...(item as ClubReport).leaders.slice(0, 2),
+      ];
     case "schoolEvents":
-      return [(item as SchoolEvent).type, (item as SchoolEvent).location, ...(item as SchoolEvent).materials.slice(0, 2)];
+      return [
+        (item as SchoolEvent).type,
+        (item as SchoolEvent).location,
+        ...(item as SchoolEvent).materials.slice(0, 2),
+      ];
     case "publications":
-      return [(item as Publication).type, (item as Publication).issue, formatArchiveDate((item as Publication).publishDate)];
+      return [
+        (item as Publication).type,
+        (item as Publication).issue,
+        formatArchiveDate((item as Publication).publishDate),
+      ];
     case "schoolProfiles":
       return [(item as SchoolProfile).academicYear, "school profile", "admissions"];
     case "buildingHistory":
-      return [(item as BuildingHistory).buildingName, (item as BuildingHistory).changeType, String((item as BuildingHistory).timelineYear)];
+      return [
+        (item as BuildingHistory).buildingName,
+        (item as BuildingHistory).changeType,
+        String((item as BuildingHistory).timelineYear),
+      ];
     case "alumniProfiles":
-      return [String((item as AlumniProfile).graduationYear), (item as AlumniProfile).major, (item as AlumniProfile).currentRole];
+      return [
+        String((item as AlumniProfile).graduationYear),
+        (item as AlumniProfile).major,
+        (item as AlumniProfile).currentRole,
+      ];
     case "gradeTasks":
       return [(item as GradeTask).grade, (item as GradeTask).status, (item as GradeTask).owner];
   }

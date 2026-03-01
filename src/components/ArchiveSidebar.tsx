@@ -55,7 +55,7 @@ export default function ArchiveSidebar({
         Now: {activeLabel}
       </p>
 
-      <nav className="mt-3 flex flex-col gap-1.5" aria-label="Section navigation">
+      <nav className="mt-3 flex flex-col gap-1" aria-label="Section navigation">
         {sections.map((section) => {
           const isActive = section.id === activeId;
           return (
@@ -77,12 +77,12 @@ export default function ArchiveSidebar({
         <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
           Quick Actions
         </p>
-        <div className="mt-2 flex flex-col gap-2">
+        <div className="mt-2 flex flex-col gap-1.5">
           {quickActions.map((action) => (
             <Link
               key={action.label}
               href={action.href}
-              className="text-sm font-semibold text-[var(--accent)]"
+              className="archive-quick-link text-sm font-semibold"
             >
               {action.label}
             </Link>
