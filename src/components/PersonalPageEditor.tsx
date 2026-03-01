@@ -35,6 +35,17 @@ function emptyProject() {
   };
 }
 
+function formatList(values: string[]) {
+  return values.join(", ");
+}
+
+function parseList(value: string) {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export default function PersonalPageEditor({
   initialPayload,
   endpoint,
@@ -155,6 +166,38 @@ export default function PersonalPageEditor({
                   disabled={!canManage}
                   className="archive-filter-input w-full"
                   placeholder="2027"
+                />
+              </label>
+
+              <label className="auth-field">
+                <span>Target Majors</span>
+                <input
+                  value={formatList(payload.page.targetMajors)}
+                  onChange={(event) =>
+                    setPayload((prev) => ({
+                      ...prev,
+                      page: { ...prev.page, targetMajors: parseList(event.target.value) },
+                    }))
+                  }
+                  disabled={!canManage}
+                  className="archive-filter-input w-full"
+                  placeholder="Computer Science, Data Science"
+                />
+              </label>
+
+              <label className="auth-field">
+                <span>Target Colleges</span>
+                <input
+                  value={formatList(payload.page.targetColleges)}
+                  onChange={(event) =>
+                    setPayload((prev) => ({
+                      ...prev,
+                      page: { ...prev.page, targetColleges: parseList(event.target.value) },
+                    }))
+                  }
+                  disabled={!canManage}
+                  className="archive-filter-input w-full"
+                  placeholder="CMU, Georgia Tech, KAIST"
                 />
               </label>
 
@@ -477,6 +520,14 @@ export default function PersonalPageEditor({
               <div className="personal-stat">
                 <span>Graduation year</span>
                 <strong>{payload.page.graduationYear || "-"}</strong>
+              </div>
+              <div className="personal-stat">
+                <span>Target majors</span>
+                <strong>{payload.page.targetMajors.length}</strong>
+              </div>
+              <div className="personal-stat">
+                <span>Target colleges</span>
+                <strong>{payload.page.targetColleges.length}</strong>
               </div>
             </div>
           </section>

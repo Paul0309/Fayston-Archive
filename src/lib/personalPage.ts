@@ -12,6 +12,8 @@ export interface PersonalPagePayload {
     headline: string;
     bio: string;
     graduationYear: string;
+    targetMajors: string[];
+    targetColleges: string[];
     transcriptNote: string;
     transcripts: {
       id: string;
@@ -99,6 +101,8 @@ export function serializePersonalPage(
       headline: user.personalPage.headline ?? "",
       bio: user.personalPage.bio ?? "",
       graduationYear: user.personalPage.graduationYear ?? "",
+      targetMajors: user.personalPage.targetMajors,
+      targetColleges: user.personalPage.targetColleges,
       transcriptNote: user.personalPage.transcriptNote ?? "",
       transcripts: user.personalPage.transcripts.map((item) => ({
         id: item.id,

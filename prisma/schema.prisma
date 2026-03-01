@@ -46,6 +46,8 @@ model PersonalPage {
   headline       String?
   bio            String?
   graduationYear String?
+  targetMajors   String[]         @default([])
+  targetColleges String[]         @default([])
   transcriptNote String?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt

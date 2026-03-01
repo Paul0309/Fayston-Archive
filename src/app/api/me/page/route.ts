@@ -8,6 +8,8 @@ interface PageBody {
   headline?: string;
   bio?: string;
   graduationYear?: string;
+  targetMajors?: string[];
+  targetColleges?: string[];
   transcriptNote?: string;
   transcripts?: {
     id?: string;
@@ -28,6 +30,10 @@ interface PageBody {
 
 function clean(value?: string) {
   return value?.trim() ?? "";
+}
+
+function cleanList(values?: string[]) {
+  return (values ?? []).map((value) => clean(value)).filter(Boolean);
 }
 
 export async function GET() {
@@ -82,6 +88,8 @@ export async function PUT(request: Request) {
       headline: clean(body.headline) || null,
       bio: clean(body.bio) || null,
       graduationYear: clean(body.graduationYear) || null,
+      targetMajors: cleanList(body.targetMajors),
+      targetColleges: cleanList(body.targetColleges),
       transcriptNote: clean(body.transcriptNote) || null,
       transcripts: {
         deleteMany: {},

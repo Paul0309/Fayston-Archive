@@ -90,6 +90,34 @@ export default function MyCollegeCounselor({ endpoint }: MyCollegeCounselorProps
     setSending(false);
   }
 
+  async function askPreset(prompt: string) {
+    if (sending) return;
+    setInput(prompt);
+    setMessages((prev) => [...prev, { sender: "user", text: prompt }]);
+    setSending(true);
+    setError(null);
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: prompt }),
+    });
+
+    if (!response.ok) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "The counselor could not answer that right now." },
+      ]);
+      setSending(false);
+      return;
+    }
+
+    const data = (await response.json()) as { answer: string };
+    setMessages((prev) => [...prev, { sender: "ai", text: data.answer }]);
+    setInput("");
+    setSending(false);
+  }
+
   return (
     <section className="section-block px-5 py-5">
       <div className="personal-section-head">
@@ -111,6 +139,11 @@ export default function MyCollegeCounselor({ endpoint }: MyCollegeCounselorProps
             </div>
 
             <div className="personal-counselor-card">
+              <p className="section-cover-kicker">Target Context</p>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{insights.targetContext}</p>
+            </div>
+
+            <div className="personal-counselor-card">
               <p className="section-cover-kicker">Admissions Gaps</p>
               <ul className="mt-3 grid gap-2 text-sm leading-7 text-[var(--muted)]">
                 {insights.gaps.map((item) => (
@@ -127,6 +160,33 @@ export default function MyCollegeCounselor({ endpoint }: MyCollegeCounselorProps
                 ))}
               </ul>
             </div>
+
+            <div className="personal-counselor-card">
+              <p className="section-cover-kicker">30-Day Plan</p>
+              <ul className="mt-3 grid gap-2 text-sm leading-7 text-[var(--muted)]">
+                {insights.thirtyDayPlan.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="personal-counselor-card">
+              <p className="section-cover-kicker">Summer Strategy</p>
+              <ul className="mt-3 grid gap-2 text-sm leading-7 text-[var(--muted)]">
+                {insights.summerStrategy.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="personal-counselor-card">
+              <p className="section-cover-kicker">Essay Angles</p>
+              <ul className="mt-3 grid gap-2 text-sm leading-7 text-[var(--muted)]">
+                {insights.essayAngles.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           <div>
@@ -137,7 +197,7 @@ export default function MyCollegeCounselor({ endpoint }: MyCollegeCounselorProps
                   key={prompt}
                   type="button"
                   className="section-chip"
-                  onClick={() => setInput(prompt)}
+                  onClick={() => void askPreset(prompt)}
                 >
                   {prompt}
                 </button>
