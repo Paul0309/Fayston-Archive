@@ -43,6 +43,8 @@ model User {
 model PersonalPage {
   id             String           @id @default(cuid())
   userId         String           @unique
+  gradeLevel     String?
+  profileVisibility String        @default("PRIVATE")
   headline       String?
   bio            String?
   graduationYear String?

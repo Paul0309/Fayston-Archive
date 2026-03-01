@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { getOrCreatePersonalPageByUserId, serializePersonalPage } from "@/lib/personalPage";
 
 interface PageBody {
+  gradeLevel?: string;
+  profileVisibility?: string;
   headline?: string;
   bio?: string;
   graduationYear?: string;
@@ -86,6 +88,8 @@ export async function PUT(request: Request) {
     where: { id: user.personalPage.id },
     data: {
       headline: clean(body.headline) || null,
+      gradeLevel: clean(body.gradeLevel) || null,
+      profileVisibility: clean(body.profileVisibility) || "PRIVATE",
       bio: clean(body.bio) || null,
       graduationYear: clean(body.graduationYear) || null,
       targetMajors: cleanList(body.targetMajors),

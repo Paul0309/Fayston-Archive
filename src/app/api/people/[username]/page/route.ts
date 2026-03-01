@@ -6,6 +6,8 @@ import { isAdminRole } from "@/lib/roles";
 import { getOrCreatePersonalPageByUserId, serializePersonalPage } from "@/lib/personalPage";
 
 interface PageBody {
+  gradeLevel?: string;
+  profileVisibility?: string;
   headline?: string;
   bio?: string;
   graduationYear?: string;
@@ -121,6 +123,8 @@ export async function PUT(
     where: { id: user.personalPage.id },
     data: {
       headline: clean(body.headline) || null,
+      gradeLevel: clean(body.gradeLevel) || null,
+      profileVisibility: clean(body.profileVisibility) || "PRIVATE",
       bio: clean(body.bio) || null,
       graduationYear: clean(body.graduationYear) || null,
       targetMajors: cleanList(body.targetMajors),

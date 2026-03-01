@@ -18,6 +18,8 @@ function normalizePayload(payload: PersonalPagePayload): PersonalPagePayload {
     ...payload,
     page: {
       ...payload.page,
+      gradeLevel: payload.page.gradeLevel ?? "",
+      profileVisibility: payload.page.profileVisibility ?? "PRIVATE",
       headline: payload.page.headline ?? "",
       bio: payload.page.bio ?? "",
       graduationYear: payload.page.graduationYear ?? "",
@@ -231,6 +233,28 @@ export default function PersonalPageEditor({
 
             <div className="personal-form-grid">
               <label className="auth-field">
+                <span>Grade</span>
+                <select
+                  value={payload.page.gradeLevel}
+                  onChange={(event) =>
+                    setPayload((prev) => ({
+                      ...prev,
+                      page: { ...prev.page, gradeLevel: event.target.value },
+                    }))
+                  }
+                  disabled={!canManage}
+                  className="archive-filter-input w-full"
+                >
+                  <option value="">Select grade</option>
+                  <option value="Grade 9">Grade 9</option>
+                  <option value="Grade 10">Grade 10</option>
+                  <option value="Grade 11">Grade 11</option>
+                  <option value="Grade 12">Grade 12</option>
+                  <option value="Graduate">Graduate</option>
+                </select>
+              </label>
+
+              <label className="auth-field">
                 <span>Headline</span>
                 <input
                   value={payload.page.headline}
@@ -243,6 +267,22 @@ export default function PersonalPageEditor({
                   disabled={!canManage}
                   className="archive-filter-input w-full"
                   placeholder="e.g. CS + Math applicant focused on systems and data"
+                />
+              </label>
+
+              <label className="auth-field">
+                <span>Target Majors</span>
+                <input
+                  value={formatList(payload.page.targetMajors)}
+                  onChange={(event) =>
+                    setPayload((prev) => ({
+                      ...prev,
+                      page: { ...prev.page, targetMajors: parseList(event.target.value) },
+                    }))
+                  }
+                  disabled={!canManage}
+                  className="archive-filter-input w-full"
+                  placeholder="Computer Science, Data Science"
                 />
               </label>
 
@@ -263,19 +303,21 @@ export default function PersonalPageEditor({
               </label>
 
               <label className="auth-field">
-                <span>Target Majors</span>
-                <input
-                  value={formatList(payload.page.targetMajors)}
+                <span>Profile Visibility</span>
+                <select
+                  value={payload.page.profileVisibility}
                   onChange={(event) =>
                     setPayload((prev) => ({
                       ...prev,
-                      page: { ...prev.page, targetMajors: parseList(event.target.value) },
+                      page: { ...prev.page, profileVisibility: event.target.value },
                     }))
                   }
                   disabled={!canManage}
                   className="archive-filter-input w-full"
-                  placeholder="Computer Science, Data Science"
-                />
+                >
+                  <option value="PRIVATE">Private</option>
+                  <option value="DIRECTORY">Public in Students</option>
+                </select>
               </label>
 
               <label className="auth-field">
@@ -655,6 +697,10 @@ export default function PersonalPageEditor({
             <p className="section-cover-kicker">Snapshot</p>
             <div className="mt-4 grid gap-3 text-sm text-[var(--muted)]">
               <div className="personal-stat">
+                <span>Grade</span>
+                <strong>{payload.page.gradeLevel || "-"}</strong>
+              </div>
+              <div className="personal-stat">
                 <span>Transcript lines</span>
                 <strong>{(payload.page.transcripts ?? []).length}</strong>
               </div>
@@ -675,6 +721,10 @@ export default function PersonalPageEditor({
                 <strong>{payload.page.graduationYear || "-"}</strong>
               </div>
               <div className="personal-stat">
+                <span>Visibility</span>
+                <strong>{payload.page.profileVisibility}</strong>
+              </div>
+              <div className="personal-stat">
                 <span>Target majors</span>
                 <strong>{(payload.page.targetMajors ?? []).length}</strong>
               </div>
@@ -688,7 +738,9 @@ export default function PersonalPageEditor({
           <section className="section-block px-5 py-5 personal-surface">
             <p className="section-cover-kicker">Access</p>
             <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-              This page is private. Only the owner and users with the admin role can open or edit it.
+              Transcript records, transcript files, projects, and counselor notes remain private. Only the owner and
+              admins can open or edit this full page. If visibility is set to directory, only the public profile
+              summary is shown in the Students directory.
             </p>
           </section>
 

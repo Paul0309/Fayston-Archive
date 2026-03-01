@@ -9,6 +9,8 @@ export interface PersonalPagePayload {
     role: string;
   };
   page: {
+    gradeLevel: string;
+    profileVisibility: string;
     headline: string;
     bio: string;
     graduationYear: string;
@@ -113,6 +115,8 @@ export function serializePersonalPage(
     },
     page: {
       headline: user.personalPage.headline ?? "",
+      gradeLevel: user.personalPage.gradeLevel ?? "",
+      profileVisibility: user.personalPage.profileVisibility ?? "PRIVATE",
       bio: user.personalPage.bio ?? "",
       graduationYear: user.personalPage.graduationYear ?? "",
       targetMajors: user.personalPage.targetMajors,

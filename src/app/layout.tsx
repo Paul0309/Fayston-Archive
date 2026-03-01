@@ -43,7 +43,7 @@ export default function RootLayout({
                   <Link href="/updates" className="nav-link">Updates</Link>
                   <Link href="/projects" className="nav-link">Projects</Link>
                   <Link href="/links" className="nav-link">Links</Link>
-                  <Link href="/me" className="nav-link">My Page</Link>
+                  <Link href="/students" className="nav-link">Students</Link>
                   <Link href="/admin" className="nav-link">Admin</Link>
                   <Link href="/api/archive" className="nav-link">API</Link>
                 </nav>
@@ -88,6 +88,9 @@ export default function RootLayout({
                     </Link>
                     <Link href="/links" className="font-semibold text-[var(--accent)]">
                       School Links
+                    </Link>
+                    <Link href="/students" className="font-semibold text-[var(--accent)]">
+                      Students
                     </Link>
                     <Link href="/admin" className="font-semibold text-[var(--accent)]">
                       Admin

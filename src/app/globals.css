@@ -291,6 +291,12 @@ body::-webkit-scrollbar {
   padding: 0.95rem;
 }
 
+.student-card {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, white 98%, var(--accent) 2%);
+  padding: 1rem;
+}
+
 .archive-sidebar-now {
   display: inline-block;
   border: 1px solid var(--border);
