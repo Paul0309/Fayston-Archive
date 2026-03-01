@@ -48,6 +48,7 @@ export default async function PrivateUserPage({
         <PersonalPageEditor
           initialPayload={payload}
           endpoint={`/api/people/${username}/page`}
+          counselorEndpoint={`/api/people/${username}/counselor`}
           canManage
           viewingAsAdmin={!isOwner && isAdmin}
         />

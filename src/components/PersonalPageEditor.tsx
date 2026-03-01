@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import MyCollegeCounselor from "@/components/MyCollegeCounselor";
 import type { PersonalPagePayload } from "@/lib/personalPage";
 
 interface PersonalPageEditorProps {
   initialPayload: PersonalPagePayload;
   endpoint: string;
+  counselorEndpoint: string;
   canManage: boolean;
   viewingAsAdmin?: boolean;
 }
@@ -36,6 +38,7 @@ function emptyProject() {
 export default function PersonalPageEditor({
   initialPayload,
   endpoint,
+  counselorEndpoint,
   canManage,
   viewingAsAdmin = false,
 }: PersonalPageEditorProps) {
@@ -484,6 +487,8 @@ export default function PersonalPageEditor({
               This page is private. Only the owner and users with the admin role can open or edit it.
             </p>
           </section>
+
+          <MyCollegeCounselor endpoint={counselorEndpoint} />
         </aside>
       </div>
     </div>

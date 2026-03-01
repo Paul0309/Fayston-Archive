@@ -23,6 +23,7 @@ export default async function MyPage() {
         <PersonalPageEditor
           initialPayload={payload}
           endpoint="/api/me/page"
+          counselorEndpoint="/api/me/counselor"
           canManage
         />
       </div>
