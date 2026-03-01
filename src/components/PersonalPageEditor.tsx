@@ -13,6 +13,24 @@ interface PersonalPageEditorProps {
   viewingAsAdmin?: boolean;
 }
 
+function normalizePayload(payload: PersonalPagePayload): PersonalPagePayload {
+  return {
+    ...payload,
+    page: {
+      ...payload.page,
+      headline: payload.page.headline ?? "",
+      bio: payload.page.bio ?? "",
+      graduationYear: payload.page.graduationYear ?? "",
+      targetMajors: payload.page.targetMajors ?? [],
+      targetColleges: payload.page.targetColleges ?? [],
+      transcriptNote: payload.page.transcriptNote ?? "",
+      transcriptDocs: payload.page.transcriptDocs ?? [],
+      transcripts: payload.page.transcripts ?? [],
+      projects: payload.page.projects ?? [],
+    },
+  };
+}
+
 function emptyTranscript() {
   return {
     id: crypto.randomUUID(),
@@ -61,7 +79,7 @@ export default function PersonalPageEditor({
   canManage,
   viewingAsAdmin = false,
 }: PersonalPageEditorProps) {
-  const [payload, setPayload] = useState(initialPayload);
+  const [payload, setPayload] = useState(() => normalizePayload(initialPayload));
   const [saving, setSaving] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -98,7 +116,7 @@ export default function PersonalPageEditor({
     }
 
     const data = (await response.json()) as { payload: PersonalPagePayload };
-    setPayload(data.payload);
+    setPayload(normalizePayload(data.payload));
     setNotice("Saved.");
     setSaving(false);
   }
@@ -136,7 +154,7 @@ export default function PersonalPageEditor({
       ...prev,
       page: {
         ...prev.page,
-        transcriptDocs: [data.document, ...prev.page.transcriptDocs],
+        transcriptDocs: [data.document, ...(prev.page.transcriptDocs ?? [])],
       },
     }));
     setNotice("Transcript file uploaded.");
@@ -159,7 +177,7 @@ export default function PersonalPageEditor({
       ...prev,
       page: {
         ...prev.page,
-        transcriptDocs: prev.page.transcriptDocs.filter((item) => item.id !== id),
+        transcriptDocs: (prev.page.transcriptDocs ?? []).filter((item) => item.id !== id),
       },
     }));
     setNotice("Transcript file removed.");
@@ -187,8 +205,8 @@ export default function PersonalPageEditor({
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_320px]">
-        <div className="grid gap-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.95fr)]">
+        <div className="grid gap-5">
           <section className="section-block px-6 py-6">
             <div className="personal-section-head">
               <div>
@@ -207,7 +225,7 @@ export default function PersonalPageEditor({
               ) : null}
             </div>
 
-            <div className="mt-5 grid gap-4">
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
               <label className="auth-field">
                 <span>Headline</span>
                 <input
@@ -272,7 +290,7 @@ export default function PersonalPageEditor({
                 />
               </label>
 
-              <label className="auth-field">
+              <label className="auth-field md:col-span-2">
                 <span>Bio</span>
                 <textarea
                   value={payload.page.bio}
@@ -288,7 +306,7 @@ export default function PersonalPageEditor({
                 />
               </label>
 
-              <label className="auth-field">
+              <label className="auth-field md:col-span-2">
                 <span>Transcript Note</span>
                 <textarea
                   value={payload.page.transcriptNote}
@@ -348,13 +366,13 @@ export default function PersonalPageEditor({
               </div>
             </div>
 
-            <div className="mt-5">
+            <div className="mt-5 border-t border-[var(--border)] pt-5">
               <p className="section-cover-kicker">Transcript Files</p>
               <div className="mt-3 grid gap-3">
-                {payload.page.transcriptDocs.length === 0 ? (
+                {(payload.page.transcriptDocs ?? []).length === 0 ? (
                   <p className="text-sm text-[var(--muted)]">No transcript files uploaded yet.</p>
                 ) : (
-                  payload.page.transcriptDocs.map((item) => (
+                  (payload.page.transcriptDocs ?? []).map((item) => (
                     <div key={item.id} className="personal-card-grid">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
@@ -387,11 +405,13 @@ export default function PersonalPageEditor({
               </div>
             </div>
 
-            <div className="mt-5 grid gap-4">
-              {payload.page.transcripts.length === 0 ? (
+            <div className="mt-5 border-t border-[var(--border)] pt-5">
+              <p className="section-cover-kicker">Transcript Lines</p>
+              <div className="mt-3 grid gap-4">
+              {(payload.page.transcripts ?? []).length === 0 ? (
                 <p className="text-sm text-[var(--muted)]">No transcript lines yet.</p>
               ) : (
-                payload.page.transcripts.map((item, index) => (
+                (payload.page.transcripts ?? []).map((item, index) => (
                   <div key={item.id} className="personal-card-grid">
                     <div className="grid gap-4 md:grid-cols-3">
                       <label className="auth-field">
@@ -481,6 +501,7 @@ export default function PersonalPageEditor({
                   </div>
                 ))
               )}
+              </div>
             </div>
           </section>
 
@@ -510,10 +531,10 @@ export default function PersonalPageEditor({
             </div>
 
             <div className="mt-5 grid gap-4">
-              {payload.page.projects.length === 0 ? (
+              {(payload.page.projects ?? []).length === 0 ? (
                 <p className="text-sm text-[var(--muted)]">No private projects yet.</p>
               ) : (
-                payload.page.projects.map((item, index) => (
+                (payload.page.projects ?? []).map((item, index) => (
                   <div key={item.id} className="personal-card-grid">
                     <div className="grid gap-4 md:grid-cols-3">
                       <label className="auth-field md:col-span-2">
@@ -631,15 +652,15 @@ export default function PersonalPageEditor({
             <div className="mt-4 grid gap-3 text-sm text-[var(--muted)]">
               <div className="personal-stat">
                 <span>Transcript lines</span>
-                <strong>{payload.page.transcripts.length}</strong>
+                <strong>{(payload.page.transcripts ?? []).length}</strong>
               </div>
               <div className="personal-stat">
                 <span>Transcript files</span>
-                <strong>{payload.page.transcriptDocs.length}</strong>
+                <strong>{(payload.page.transcriptDocs ?? []).length}</strong>
               </div>
               <div className="personal-stat">
                 <span>Projects</span>
-                <strong>{payload.page.projects.length}</strong>
+                <strong>{(payload.page.projects ?? []).length}</strong>
               </div>
               <div className="personal-stat">
                 <span>Average grade</span>
@@ -651,11 +672,11 @@ export default function PersonalPageEditor({
               </div>
               <div className="personal-stat">
                 <span>Target majors</span>
-                <strong>{payload.page.targetMajors.length}</strong>
+                <strong>{(payload.page.targetMajors ?? []).length}</strong>
               </div>
               <div className="personal-stat">
                 <span>Target colleges</span>
-                <strong>{payload.page.targetColleges.length}</strong>
+                <strong>{(payload.page.targetColleges ?? []).length}</strong>
               </div>
             </div>
           </section>
