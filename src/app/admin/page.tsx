@@ -1,7 +1,15 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
 import AdminIntakePanel from "@/components/AdminIntakePanel";
+import { authOptions } from "@/lib/auth";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    redirect("/login");
+  }
+
   return (
     <main className="px-4 py-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
