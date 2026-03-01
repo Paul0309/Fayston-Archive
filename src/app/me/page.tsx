@@ -24,6 +24,7 @@ export default async function MyPage() {
           initialPayload={payload}
           endpoint="/api/me/page"
           counselorEndpoint="/api/me/counselor"
+          transcriptUploadEndpoint="/api/me/transcripts/upload"
           canManage
         />
       </div>

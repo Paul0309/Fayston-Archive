@@ -53,6 +53,7 @@ model PersonalPage {
   updatedAt      DateTime         @updatedAt
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   transcripts    TranscriptItem[]
+  transcriptDocs TranscriptDocument[]
   projects       PrivateProject[]
 }
 
@@ -85,6 +86,22 @@ model PrivateProject {
   page      PersonalPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   @@index([pageId, sortOrder])
+}
+
+model TranscriptDocument {
+  id           String       @id @default(cuid())
+  pageId       String
+  title        String
+  originalName String
+  storedName   String
+  mimeType     String
+  sizeBytes    Int
+  relativePath String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  page         PersonalPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, createdAt])
 }
 
 model Account {

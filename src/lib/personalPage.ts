@@ -15,6 +15,14 @@ export interface PersonalPagePayload {
     targetMajors: string[];
     targetColleges: string[];
     transcriptNote: string;
+    transcriptDocs: {
+      id: string;
+      title: string;
+      originalName: string;
+      mimeType: string;
+      sizeBytes: number;
+      createdAt: string;
+    }[];
     transcripts: {
       id: string;
       term: string;
@@ -44,6 +52,9 @@ export async function getOrCreatePersonalPageByUserId(userId: string) {
           transcripts: {
             orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
           },
+          transcriptDocs: {
+            orderBy: [{ createdAt: "desc" }],
+          },
           projects: {
             orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
           },
@@ -72,6 +83,9 @@ export async function getOrCreatePersonalPageByUserId(userId: string) {
         include: {
           transcripts: {
             orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+          },
+          transcriptDocs: {
+            orderBy: [{ createdAt: "desc" }],
           },
           projects: {
             orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -104,6 +118,14 @@ export function serializePersonalPage(
       targetMajors: user.personalPage.targetMajors,
       targetColleges: user.personalPage.targetColleges,
       transcriptNote: user.personalPage.transcriptNote ?? "",
+      transcriptDocs: user.personalPage.transcriptDocs.map((item) => ({
+        id: item.id,
+        title: item.title,
+        originalName: item.originalName,
+        mimeType: item.mimeType,
+        sizeBytes: item.sizeBytes,
+        createdAt: item.createdAt.toISOString(),
+      })),
       transcripts: user.personalPage.transcripts.map((item) => ({
         id: item.id,
         term: item.term,

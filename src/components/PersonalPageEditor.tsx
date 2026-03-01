@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { type ChangeEvent, useMemo, useState } from "react";
 import MyCollegeCounselor from "@/components/MyCollegeCounselor";
 import type { PersonalPagePayload } from "@/lib/personalPage";
 
@@ -8,6 +8,7 @@ interface PersonalPageEditorProps {
   initialPayload: PersonalPagePayload;
   endpoint: string;
   counselorEndpoint: string;
+  transcriptUploadEndpoint: string;
   canManage: boolean;
   viewingAsAdmin?: boolean;
 }
@@ -46,15 +47,23 @@ function parseList(value: string) {
     .filter(Boolean);
 }
 
+function formatBytes(value: number) {
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default function PersonalPageEditor({
   initialPayload,
   endpoint,
   counselorEndpoint,
+  transcriptUploadEndpoint,
   canManage,
   viewingAsAdmin = false,
 }: PersonalPageEditorProps) {
   const [payload, setPayload] = useState(initialPayload);
   const [saving, setSaving] = useState(false);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,6 +101,68 @@ export default function PersonalPageEditor({
     setPayload(data.payload);
     setNotice("Saved.");
     setSaving(false);
+  }
+
+  async function onUploadTranscript(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingDoc(true);
+    setNotice(null);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", file.name.replace(/\.[^.]+$/, ""));
+
+    const response = await fetch(transcriptUploadEndpoint, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const data = (await response.json().catch(() => ({ error: "Upload failed" }))) as { error?: string };
+      setError(data.error ?? "Upload failed");
+      setUploadingDoc(false);
+      event.target.value = "";
+      return;
+    }
+
+    const data = (await response.json()) as {
+      document: PersonalPagePayload["page"]["transcriptDocs"][number];
+    };
+
+    setPayload((prev) => ({
+      ...prev,
+      page: {
+        ...prev.page,
+        transcriptDocs: [data.document, ...prev.page.transcriptDocs],
+      },
+    }));
+    setNotice("Transcript file uploaded.");
+    setUploadingDoc(false);
+    event.target.value = "";
+  }
+
+  async function onDeleteTranscriptDoc(id: string) {
+    const response = await fetch(`/api/transcript-documents/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const data = (await response.json().catch(() => ({ error: "Delete failed" }))) as { error?: string };
+      setError(data.error ?? "Delete failed");
+      return;
+    }
+
+    setPayload((prev) => ({
+      ...prev,
+      page: {
+        ...prev.page,
+        transcriptDocs: prev.page.transcriptDocs.filter((item) => item.id !== id),
+      },
+    }));
+    setNotice("Transcript file removed.");
   }
 
   return (
@@ -244,23 +315,76 @@ export default function PersonalPageEditor({
                 <p className="section-cover-kicker">Transcripts</p>
                 <h2 className="mt-2 text-2xl font-black text-[var(--primary)]">Academic Record</h2>
               </div>
-              {canManage ? (
-                <button
-                  type="button"
-                  className="section-chip"
-                  onClick={() =>
-                    setPayload((prev) => ({
-                      ...prev,
-                      page: {
-                        ...prev.page,
-                        transcripts: [...prev.page.transcripts, emptyTranscript()],
-                      },
-                    }))
-                  }
-                >
-                  Add Transcript Line
-                </button>
-              ) : null}
+              <div className="flex flex-wrap gap-2">
+                {canManage ? (
+                  <button
+                    type="button"
+                    className="section-chip"
+                    onClick={() =>
+                      setPayload((prev) => ({
+                        ...prev,
+                        page: {
+                          ...prev.page,
+                          transcripts: [...prev.page.transcripts, emptyTranscript()],
+                        },
+                      }))
+                    }
+                  >
+                    Add Transcript Line
+                  </button>
+                ) : null}
+                {canManage ? (
+                  <label className="section-chip cursor-pointer">
+                    {uploadingDoc ? "Uploading..." : "Upload Transcript File"}
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      onChange={onUploadTranscript}
+                      disabled={uploadingDoc}
+                    />
+                  </label>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <p className="section-cover-kicker">Transcript Files</p>
+              <div className="mt-3 grid gap-3">
+                {payload.page.transcriptDocs.length === 0 ? (
+                  <p className="text-sm text-[var(--muted)]">No transcript files uploaded yet.</p>
+                ) : (
+                  payload.page.transcriptDocs.map((item) => (
+                    <div key={item.id} className="personal-card-grid">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-bold text-[var(--primary)]">{item.title}</p>
+                          <p className="mt-1 text-xs text-[var(--muted)]">
+                            {item.originalName} | {formatBytes(item.sizeBytes)} | {new Date(item.createdAt).toLocaleDateString("en-CA")}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-3 text-sm font-semibold">
+                          <a
+                            href={`/api/transcript-documents/${item.id}/download`}
+                            className="text-[var(--accent)]"
+                          >
+                            Download
+                          </a>
+                          {canManage ? (
+                            <button
+                              type="button"
+                              className="text-[#b42318]"
+                              onClick={() => void onDeleteTranscriptDoc(item.id)}
+                            >
+                              Delete
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
             <div className="mt-5 grid gap-4">
@@ -508,6 +632,10 @@ export default function PersonalPageEditor({
               <div className="personal-stat">
                 <span>Transcript lines</span>
                 <strong>{payload.page.transcripts.length}</strong>
+              </div>
+              <div className="personal-stat">
+                <span>Transcript files</span>
+                <strong>{payload.page.transcriptDocs.length}</strong>
               </div>
               <div className="personal-stat">
                 <span>Projects</span>

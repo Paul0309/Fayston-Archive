@@ -49,6 +49,7 @@ export default async function PrivateUserPage({
           initialPayload={payload}
           endpoint={`/api/people/${username}/page`}
           counselorEndpoint={`/api/people/${username}/counselor`}
+          transcriptUploadEndpoint={`/api/people/${username}/transcripts/upload`}
           canManage
           viewingAsAdmin={!isOwner && isAdmin}
         />
