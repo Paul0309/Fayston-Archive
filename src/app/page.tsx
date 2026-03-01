@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import AICounselor from "@/components/AICounselor";
 import { archiveDataset } from "@/lib/archiveData";
 
@@ -61,6 +61,12 @@ export default function HomePage() {
             >
               Search Profiles
             </Link>
+            <Link
+              href="/admin"
+              className="border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[var(--primary)]"
+            >
+              Admin Intake
+            </Link>
           </div>
 
           <p className="mt-4 text-xs font-medium text-[var(--muted)]">
@@ -87,6 +93,30 @@ export default function HomePage() {
 
         <section className="border-t border-[var(--border)] pt-6">
           <AICounselor />
+        </section>
+
+        <section className="border-t border-[var(--border)] pt-6">
+          <div className="section-cover section-cover-subtle px-6 py-5">
+            <p className="section-cover-kicker">New Layer</p>
+            <h2 className="mt-2 text-2xl font-black text-[var(--primary)]">
+              Detail Pages + Download Flow
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--muted)]">
+              Publications, school profiles, club reports, and project records now have
+              dedicated detail pages with metadata download actions and section-level browsing.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+              <Link href="/archive/publications" className="text-[var(--accent)]">
+                Browse publications
+              </Link>
+              <Link href="/archive/schoolProfiles" className="text-[var(--accent)]">
+                Browse school profiles
+              </Link>
+              <Link href="/archive/projects" className="text-[var(--accent)]">
+                Browse project records
+              </Link>
+            </div>
+          </div>
         </section>
       </div>
     </main>

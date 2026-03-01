@@ -1,58 +1,25 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import ArchiveSidebar from "@/components/ArchiveSidebar";
-import { archiveDataset, type ArchiveSection } from "@/lib/archiveData";
 import { archiveSectionMeta, quickActions } from "@/lib/archiveMeta";
 import { searchArchive } from "@/lib/archiveSearch";
-
-const sectionLabels: Record<ArchiveSection, string> = {
-  projects: "Student Projects",
-  awards: "Awards",
-  varsityTeams: "Varsity Teams",
-  courseAnnouncements: "Course Announcements",
-  clubReports: "Club / Council Reports",
-  schoolEvents: "School Events",
-  publications: "Publications",
-  schoolProfiles: "School Profiles",
-  buildingHistory: "Building History",
-  alumniProfiles: "Alumni Profiles",
-  gradeTasks: "Grade Tasks",
-};
-
-const sectionDescriptions: Record<ArchiveSection, string> = {
-  projects: "Personal and official student project records.",
-  awards: "Historical award outcomes and recipients.",
-  varsityTeams: "Team list with varsity achievements.",
-  courseAnnouncements: "Newly opened classes and notices.",
-  clubReports: "Activity reports and member leadership snapshots.",
-  schoolEvents: "Upcoming and past events with materials.",
-  publications: "Student handbook and weekly letters.",
-  schoolProfiles: "Academic-year-based school profile documents.",
-  buildingHistory: "Campus building timeline and changes.",
-  alumniProfiles: "Graduate profile and social links.",
-  gradeTasks: "Per-grade assignments and deadlines.",
-};
+import {
+  archiveSectionDescriptions,
+  archiveSectionKeywords,
+  archiveSectionLabels,
+  formatArchiveDate,
+  getArchiveListItem,
+  getArchiveSectionItems,
+  getArchiveYears,
+} from "@/lib/archivePresentation";
+import { archiveDataset, type ArchiveSection } from "@/lib/archiveData";
 
 interface ArchivePageProps {
-  searchParams: Promise<{ q?: string }>;
-}
-
-function formatDate(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function previewText(item: unknown): string {
-  if (!item || typeof item !== "object") return "";
-  const values = Object.values(item as Record<string, unknown>);
-  return values
-    .map((v) => (typeof v === "string" || typeof v === "number" ? String(v) : ""))
-    .filter(Boolean)
-    .slice(0, 4)
-    .join(" | ");
+  searchParams: Promise<{
+    q?: string;
+    section?: string;
+    year?: string;
+    verification?: "official" | "reviewing";
+  }>;
 }
 
 function getRankingLabel(section: ArchiveSection, index: number): string {
@@ -66,12 +33,31 @@ function getRankingLabel(section: ArchiveSection, index: number): string {
 export default async function ArchivePage({ searchParams }: ArchivePageProps) {
   const params = await searchParams;
   const query = (params.q ?? "").trim();
-  const results = query ? searchArchive(query) : [];
+  const sectionFilter =
+    params.section && params.section in archiveDataset
+      ? (params.section as ArchiveSection)
+      : undefined;
+  const yearFilter = (params.year ?? "").trim() || undefined;
+  const verificationFilter =
+    params.verification === "official" || params.verification === "reviewing"
+      ? params.verification
+      : undefined;
+
+  const results =
+    query || sectionFilter || yearFilter || verificationFilter
+      ? searchArchive(query, {
+          section: sectionFilter,
+          year: yearFilter,
+          verification: verificationFilter,
+        })
+      : [];
+
   const sections = Object.keys(archiveDataset) as ArchiveSection[];
+  const years = getArchiveYears();
 
   const sidebarSections = sections.map((section) => ({
     id: section,
-    label: sectionLabels[section],
+    label: archiveSectionLabels[section],
     count: archiveDataset[section].length,
   }));
 
@@ -81,46 +67,128 @@ export default async function ArchivePage({ searchParams }: ArchivePageProps) {
         <ArchiveSidebar sections={sidebarSections} quickActions={quickActions} />
 
         <div>
-          <header className="border-b border-[var(--border)] pb-5">
-            <h1 className="text-3xl font-black text-[var(--primary)]">Archive</h1>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              One continuous index of official school information.
-            </p>
+          <header className="section-cover border border-[var(--border)] px-6 py-6">
+            <p className="section-cover-kicker">Archive Index</p>
+            <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-black text-[var(--primary)]">Archive</h1>
+                <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--muted)]">
+                  One continuous index of official school information.
+                </p>
+              </div>
+              <div className="text-right text-xs font-semibold text-[var(--muted)]">
+                <p>{sections.length} sections</p>
+                <p className="mt-1">
+                  {Object.values(archiveDataset).reduce((sum, items) => sum + items.length, 0)} total
+                  records
+                </p>
+              </div>
+            </div>
 
             <div className="mt-4 border-l-2 border-[var(--accent)] pl-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
                 How To Use
               </p>
               <p className="mt-1 text-sm text-[var(--primary)]">
-                1) Jump to a section from the left nav. 2) Use global search for unknown info.
-                3) If data is missing, submit a correction request.
+                1) Jump from the left nav. 2) Filter by section, year, or verification when the exact
+                record is unknown. 3) Open detail pages for download actions and source links.
               </p>
             </div>
           </header>
 
-          <form className="mt-5 flex gap-2 border-b border-[var(--border)] pb-5" action="/archive" method="get">
+          <form
+            className="archive-filter-grid mt-5 border-b border-[var(--border)] pb-5"
+            action="/archive"
+            method="get"
+          >
             <input
               type="text"
               name="q"
               defaultValue={query}
               placeholder="Search: robotics, handbook, Grade 11"
-              className="w-full border border-[var(--border)] bg-white px-4 py-2 text-sm text-[var(--primary)] outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              className="archive-filter-input archive-filter-wide"
             />
-            <button type="submit" className="bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white">
+
+            <select
+              name="section"
+              defaultValue={sectionFilter ?? ""}
+              className="archive-filter-input"
+            >
+              <option value="">All sections</option>
+              {sections.map((section) => (
+                <option key={section} value={section}>
+                  {archiveSectionLabels[section]}
+                </option>
+              ))}
+            </select>
+
+            <select name="year" defaultValue={yearFilter ?? ""} className="archive-filter-input">
+              <option value="">All years</option>
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+
+            <select
+              name="verification"
+              defaultValue={verificationFilter ?? ""}
+              className="archive-filter-input"
+            >
+              <option value="">All statuses</option>
+              <option value="official">Official</option>
+              <option value="reviewing">Reviewing</option>
+            </select>
+
+            <button
+              type="submit"
+              className="bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
+            >
               Search
             </button>
+
+            <Link
+              href="/archive"
+              className="border border-[var(--border)] px-4 py-2 text-center text-sm font-semibold text-[var(--primary)]"
+            >
+              Reset
+            </Link>
           </form>
 
-          {query ? (
+          {query || sectionFilter || yearFilter || verificationFilter ? (
             <section className="mt-5 border-b border-[var(--border)] pb-5">
-              <h2 className="text-base font-bold text-[var(--primary)]">Search Results ({results.length})</h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">Query: {query}</p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-bold text-[var(--primary)]">
+                    Search Results ({results.length})
+                  </h2>
+                  <p className="mt-1 text-sm text-[var(--muted)]">
+                    Query: {query || "none"} · Section:{" "}
+                    {sectionFilter ? archiveSectionLabels[sectionFilter] : "all"} · Year:{" "}
+                    {yearFilter ?? "all"} · Status: {verificationFilter ?? "all"}
+                  </p>
+                </div>
+              </div>
+
               <ul className="mt-3 divide-y divide-[var(--border)] border-y border-[var(--border)]">
                 {results.map((item) => (
-                  <li key={`${item.section}-${item.id}`} className="py-2">
-                    <p className="text-xs font-semibold text-[var(--accent)]">{sectionLabels[item.section]}</p>
-                    <p className="text-sm font-semibold text-[var(--primary)]">{item.title}</p>
-                    <p className="text-xs text-[var(--muted)]">{item.snippet}</p>
+                  <li key={`${item.section}-${item.id}`} className="py-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+                          {item.sectionLabel}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-[var(--primary)]">
+                          <Link href={item.href}>{item.title}</Link>
+                        </p>
+                        <p className="mt-1 text-sm text-[var(--muted)]">{item.snippet}</p>
+                      </div>
+                      <div className="text-right text-xs font-semibold text-[var(--muted)]">
+                        <p>{item.year ?? "-"}</p>
+                        <p className="mt-1">{item.verification}</p>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -129,49 +197,108 @@ export default async function ArchivePage({ searchParams }: ArchivePageProps) {
 
           <div className="mt-2">
             {sections.map((section) => {
-              const items = archiveDataset[section];
+              const items = getArchiveSectionItems(section).map((item) => getArchiveListItem(section, item));
               const meta = archiveSectionMeta[section];
               const topItems = items.slice(0, 3);
+
               return (
                 <section id={section} key={section} className="scroll-mt-24 border-b border-[var(--border)] py-6">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <h2 className="text-xl font-bold text-[var(--primary)]">{sectionLabels[section]}</h2>
-                    <span className="text-xs font-semibold text-[var(--muted)]">{items.length} items</span>
+                  <div className="section-cover section-cover-subtle px-5 py-4">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <p className="section-cover-kicker">{archiveSectionLabels[section]}</p>
+                        <h2 className="mt-2 text-xl font-bold text-[var(--primary)]">
+                          <Link href={`/archive/${section}`}>{archiveSectionLabels[section]}</Link>
+                        </h2>
+                        <p className="mt-1 text-sm text-[var(--muted)]">
+                          {archiveSectionDescriptions[section]}
+                        </p>
+                      </div>
+                      <div className="text-right text-xs font-semibold text-[var(--muted)]">
+                        <p>{items.length} items</p>
+                        <p className="mt-1">Updated {formatArchiveDate(meta.lastUpdated)}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {archiveSectionKeywords[section].map((keyword) => (
+                        <span key={`${section}-${keyword}`} className="section-chip">
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm text-[var(--muted)]">{sectionDescriptions[section]}</p>
 
                   <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
                     <span className="font-semibold text-[var(--primary)]">
                       Source: <span className="font-normal">{meta.sourceDepartment}</span>
                     </span>
                     <span className="font-semibold text-[var(--primary)]">
-                      Verification: <span className="font-normal">{meta.verification === "official" ? "Official" : "Reviewing"}</span>
+                      Verification:{" "}
+                      <span className="font-normal">
+                        {meta.verification === "official" ? "Official" : "Reviewing"}
+                      </span>
                     </span>
                     <span className="font-semibold text-[var(--primary)]">
-                      Last Updated: <span className="font-normal">{formatDate(meta.lastUpdated)}</span>
+                      Last Updated: <span className="font-normal">{formatArchiveDate(meta.lastUpdated)}</span>
                     </span>
                   </div>
 
-                  {topItems.length > 0 ? (
+                  {items.length > 0 ? (
                     <>
                       <ul className="mt-3 divide-y divide-[var(--border)] border-y border-[var(--border)]">
                         {items.slice(0, 6).map((item) => (
-                          <li key={`${section}-${String((item as { id: number }).id)}`} className="py-2 text-sm text-[var(--primary)]">
-                            {previewText(item)}
+                          <li key={`${section}-${item.id}`} className="py-3">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div>
+                                {item.eyebrow ? (
+                                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+                                    {item.eyebrow}
+                                  </p>
+                                ) : null}
+                                <p className="mt-1 text-sm font-semibold text-[var(--primary)]">
+                                  <Link href={item.href}>{item.title}</Link>
+                                </p>
+                                <p className="mt-1 text-sm text-[var(--muted)]">{item.summary}</p>
+                              </div>
+                              <div className="text-right text-xs font-semibold text-[var(--muted)]">
+                                <p>{item.year ?? "-"}</p>
+                                <p className="mt-1">
+                                  <Link href={item.href}>Open</Link>
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold">
+                              <Link href={item.href} className="text-[var(--accent)]">
+                                Open detail
+                              </Link>
+                              {item.sourceUrl ? (
+                                <Link href={item.sourceUrl} className="text-[var(--accent)]">
+                                  Open source
+                                </Link>
+                              ) : null}
+                              <Link href={`${item.href}/download`} className="text-[var(--accent)]">
+                                Download record
+                              </Link>
+                            </div>
                           </li>
                         ))}
                       </ul>
 
                       <div className="mt-3">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Highlights</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+                          Highlights
+                        </p>
                         <div className="mt-1 flex flex-wrap gap-2">
                           {topItems.map((item, index) => (
-                            <span
-                              key={`${section}-highlight-${String((item as { id: number }).id)}`}
-                              className="border border-[var(--border)] px-2 py-1 text-xs text-[var(--primary)]"
+                            <Link
+                              key={`${section}-highlight-${item.id}`}
+                              href={item.href}
+                              className="section-chip"
                             >
                               {getRankingLabel(section, index)}
-                            </span>
+                            </Link>
                           ))}
                         </div>
                       </div>
@@ -186,6 +313,9 @@ export default async function ArchivePage({ searchParams }: ArchivePageProps) {
                   )}
 
                   <div className="mt-3 flex flex-wrap gap-3">
+                    <Link href={`/archive/${section}`} className="text-sm font-semibold text-[var(--accent)]">
+                      Open section page
+                    </Link>
                     <Link href={`/api/archive/${section}`} className="text-sm font-semibold text-[var(--accent)]">
                       Open section API
                     </Link>
@@ -201,8 +331,12 @@ export default async function ArchivePage({ searchParams }: ArchivePageProps) {
           <footer className="border-t border-[var(--border)] py-5 text-xs text-[var(--muted)]">
             <p>
               Archive policy: privacy, consent, and copyright are enforced.
-              <Link href="/policy" className="ml-2 font-semibold text-[var(--accent)]">Read policy</Link>
-              <Link href="/request-update" className="ml-3 font-semibold text-[var(--accent)]">Request correction</Link>
+              <Link href="/policy" className="ml-2 font-semibold text-[var(--accent)]">
+                Read policy
+              </Link>
+              <Link href="/request-update" className="ml-3 font-semibold text-[var(--accent)]">
+                Request correction
+              </Link>
             </p>
           </footer>
         </div>

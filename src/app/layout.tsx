@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import FloatingActionBar from "@/components/FloatingActionBar";
@@ -39,6 +39,7 @@ export default function RootLayout({
                 <Link href="/archive" className="nav-link">Archive</Link>
                 <Link href="/projects" className="nav-link">Projects</Link>
                 <Link href="/links" className="nav-link">Links</Link>
+                <Link href="/admin" className="nav-link">Admin</Link>
                 <Link href="/api/archive" className="nav-link">API</Link>
               </nav>
             </div>
@@ -78,6 +79,9 @@ export default function RootLayout({
                   </Link>
                   <Link href="/links" className="font-semibold text-[var(--accent)]">
                     School Links
+                  </Link>
+                  <Link href="/admin" className="font-semibold text-[var(--accent)]">
+                    Admin
                   </Link>
                   <Link href="/api/archive" className="font-semibold text-[var(--accent)]">
                     API

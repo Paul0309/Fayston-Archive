@@ -1,10 +1,28 @@
+import { archiveSectionMeta } from "@/lib/archiveMeta";
+import {
+  archiveSectionLabels,
+  getArchiveItemHref,
+  getArchiveItemSummary,
+  getArchiveItemTitle,
+  getArchiveItemYear,
+} from "@/lib/archivePresentation";
 import { archiveDataset, type ArchiveSection } from "@/lib/archiveData";
 
 export interface SearchResultItem {
   section: ArchiveSection;
   id: number;
+  sectionLabel: string;
   title: string;
   snippet: string;
+  href: string;
+  year?: string;
+  verification: "official" | "reviewing";
+}
+
+export interface ArchiveSearchFilters {
+  section?: ArchiveSection;
+  year?: string;
+  verification?: "official" | "reviewing";
 }
 
 function stringifyRecord(value: unknown): string {
@@ -23,36 +41,43 @@ function stringifyRecord(value: unknown): string {
   return "";
 }
 
-function sectionTitle(section: ArchiveSection, item: Record<string, unknown>): string {
-  if (typeof item.title === "string") return item.title;
-  if (typeof item.name === "string") return item.name;
-  if (typeof item.courseCode === "string" && typeof item.title === "string") {
-    return `${item.courseCode} ${item.title}`;
-  }
-  return section;
-}
-
-export function searchArchive(query: string): SearchResultItem[] {
+export function searchArchive(
+  query: string,
+  filters: ArchiveSearchFilters = {},
+): SearchResultItem[] {
   const q = query.trim().toLowerCase();
-  if (!q) return [];
+  if (!q && !filters.section && !filters.year && !filters.verification) return [];
 
   const results: SearchResultItem[] = [];
 
   (Object.keys(archiveDataset) as ArchiveSection[]).forEach((section) => {
+    if (filters.section && filters.section !== section) return;
+
     archiveDataset[section].forEach((rawItem) => {
       const item = rawItem as unknown as Record<string, unknown>;
       const text = stringifyRecord(item).toLowerCase();
-      if (!text.includes(q)) return;
+      const year = getArchiveItemYear(
+        section,
+        rawItem as never,
+      );
+      const verification = archiveSectionMeta[section].verification;
+
+      if (q && !text.includes(q)) return;
+      if (filters.year && filters.year !== year) return;
+      if (filters.verification && filters.verification !== verification) return;
 
       results.push({
         section,
+        sectionLabel: archiveSectionLabels[section],
         id: Number(item.id),
-        title: sectionTitle(section, item),
-        snippet: stringifyRecord(item).slice(0, 140),
+        title: getArchiveItemTitle(section, rawItem as never),
+        snippet: getArchiveItemSummary(section, rawItem as never),
+        href: getArchiveItemHref(section, Number(item.id)),
+        year,
+        verification,
       });
     });
   });
 
   return results;
 }
-

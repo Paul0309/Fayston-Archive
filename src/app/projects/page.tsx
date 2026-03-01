@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+import Link from "next/link";
+import { getArchiveItemHref } from "@/lib/archivePresentation";
 import type { ArchiveProject } from "@/lib/mockData";
 
 async function getProjects(): Promise<ArchiveProject[]> {
@@ -21,10 +22,10 @@ export default async function ProjectsPage() {
   return (
     <main className="px-4 py-8">
       <div className="mx-auto w-full max-w-6xl">
-        <header className="border-b border-[var(--border)] pb-5">
+        <header className="section-cover border border-[var(--border)] px-6 py-6">
           <h1 className="text-3xl font-black text-[var(--primary)]">Projects</h1>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Student and team project archive in list format.
+            Student and team project archive with direct links into the full record system.
           </p>
           <div className="mt-3">
             <Link href="/archive#projects" className="text-sm font-semibold text-[var(--accent)]">
@@ -45,16 +46,27 @@ export default async function ProjectsPage() {
               <p className="mt-1 text-sm text-[var(--muted)]">{project.description}</p>
               <p className="mt-2 text-sm text-[var(--primary)]">Members: {project.members.join(", ")}</p>
               <p className="mt-1 text-xs text-[var(--muted)]">Tags: {project.tags.join(", ")}</p>
-              {project.githubUrl ? (
-                <Link
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-block text-sm font-semibold text-[var(--accent)]"
-                >
-                  GitHub
+              <div className="mt-2 flex flex-wrap gap-4 text-sm font-semibold">
+                <Link href={getArchiveItemHref("projects", project.id)} className="text-[var(--accent)]">
+                  Open detail
                 </Link>
-              ) : null}
+                <Link
+                  href={`${getArchiveItemHref("projects", project.id)}/download`}
+                  className="text-[var(--accent)]"
+                >
+                  Download record
+                </Link>
+                {project.githubUrl ? (
+                  <Link
+                    href={project.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--accent)]"
+                  >
+                    GitHub
+                  </Link>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>
