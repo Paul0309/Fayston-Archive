@@ -14,7 +14,9 @@ export async function getPublicStudentProfiles() {
   const users = await prisma.user.findMany({
     where: {
       personalPage: {
-        profileVisibility: "DIRECTORY",
+        is: {
+          profileVisibility: "DIRECTORY",
+        },
       },
     },
     select: {
