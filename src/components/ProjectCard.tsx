@@ -1,11 +1,14 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import type { ArchiveProject } from "@/lib/mockData";
+import type { Locale } from "@/lib/i18n";
+import { getLocalizedText } from "@/lib/localized";
 
 interface ProjectCardProps {
   project: ArchiveProject;
+  locale?: Locale;
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, locale = "en" }: ProjectCardProps) {
   return (
     <article className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="mb-3 flex items-center justify-between">
@@ -15,11 +18,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <span className="text-sm text-zinc-500">{project.projectYear}</span>
       </div>
 
-      <h3 className="mb-2 text-lg font-bold text-zinc-900">{project.title}</h3>
-      <p className="mb-4 text-sm leading-6 text-zinc-700">{project.description}</p>
+      <h3 className="mb-2 text-lg font-bold text-zinc-900">{getLocalizedText(project.title, locale)}</h3>
+      <p className="mb-4 text-sm leading-6 text-zinc-700">{getLocalizedText(project.description, locale)}</p>
 
       <p className="mb-3 text-sm text-zinc-600">
-        참여 인원: {project.members.join(", ")}
+        {locale === "ko" ? "참여 인원" : "Members"}: {project.members.join(", ")}
       </p>
 
       <div className="mb-4 flex flex-wrap gap-2">
@@ -40,10 +43,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           rel="noopener noreferrer"
           className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
-          GitHub 보기
+          {locale === "ko" ? "GitHub 보기" : "View GitHub"}
         </Link>
       ) : null}
     </article>
   );
 }
-

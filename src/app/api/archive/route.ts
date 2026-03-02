@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
-import { archiveDataset } from "@/lib/archiveData";
+﻿import { NextResponse } from "next/server";
+import { getRuntimeArchiveDataset } from "@/lib/archiveAdminStore";
 
 export async function GET() {
-  return NextResponse.json(archiveDataset);
+  return NextResponse.json(await getRuntimeArchiveDataset());
 }
-

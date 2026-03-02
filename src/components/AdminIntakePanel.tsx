@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/components/LanguageProvider";
 
 type IntakeType = "publication" | "schoolProfile" | "schoolLink" | "updatePost";
 
@@ -27,6 +28,7 @@ const templateByType: Record<IntakeType, string[]> = {
 };
 
 export default function AdminIntakePanel() {
+  const { t } = useI18n();
   const [type, setType] = useState<IntakeType>("publication");
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
@@ -74,7 +76,7 @@ export default function AdminIntakePanel() {
         }
       } catch {
         if (!cancelled) {
-          setError("Could not load saved submissions.");
+          setError(t("admin.loadFailed"));
         }
       } finally {
         if (!cancelled) {
@@ -83,11 +85,11 @@ export default function AdminIntakePanel() {
       }
     };
 
-    load();
+    void load();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -120,9 +122,9 @@ export default function AdminIntakePanel() {
       setOwner("");
       setUrl("");
       setNotes("");
-      setMessage(data.backend === "prisma" ? "Saved to Prisma." : "Saved to local JSON fallback.");
+      setMessage(data.backend === "prisma" ? t("admin.savedPrisma") : t("admin.savedJson"));
     } catch {
-      setError("Save failed. Check DATABASE_URL or Prisma setup.");
+      setError(t("admin.saveFailed"));
     } finally {
       setLoading(false);
     }
@@ -130,18 +132,17 @@ export default function AdminIntakePanel() {
 
   return (
     <section className="section-cover border border-[var(--border)] px-6 py-6">
-      <p className="section-cover-kicker">Editorial + Archive Intake</p>
-      <h2 className="mt-2 text-2xl font-black text-[var(--primary)]">Admin Input Workflow</h2>
+      <p className="section-cover-kicker">{t("admin.editorialArchiveIntake")}</p>
+      <h2 className="mt-2 text-2xl font-black text-[var(--primary)]">{t("admin.workflow")}</h2>
       <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--muted)]">
-        Use this panel for both structured archive submissions and the new updates layer.
-        Archive entries stay reference-oriented. Update posts stay reading-oriented.
+        {t("admin.workflowDescription")}
       </p>
 
       <div className="mt-5 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="grid gap-3 md:grid-cols-2">
             <label className="text-sm">
-              <span className="mb-1 block font-semibold text-[var(--primary)]">Intake Type</span>
+              <span className="mb-1 block font-semibold text-[var(--primary)]">{t("admin.intakeType")}</span>
               <select
                 value={type}
                 onChange={(event) => setType(event.target.value as IntakeType)}
@@ -155,7 +156,7 @@ export default function AdminIntakePanel() {
             </label>
 
             <label className="text-sm">
-              <span className="mb-1 block font-semibold text-[var(--primary)]">Date / Year</span>
+              <span className="mb-1 block font-semibold text-[var(--primary)]">{t("admin.dateYear")}</span>
               <input
                 value={date}
                 onChange={(event) => setDate(event.target.value)}
@@ -166,7 +167,7 @@ export default function AdminIntakePanel() {
           </div>
 
           <label className="text-sm">
-            <span className="mb-1 block font-semibold text-[var(--primary)]">Title</span>
+            <span className="mb-1 block font-semibold text-[var(--primary)]">{t("admin.titleLabel")}</span>
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
@@ -180,7 +181,7 @@ export default function AdminIntakePanel() {
           </label>
 
           <label className="text-sm">
-            <span className="mb-1 block font-semibold text-[var(--primary)]">Subtitle / Issue / Slug</span>
+            <span className="mb-1 block font-semibold text-[var(--primary)]">{t("admin.subtitleIssueSlug")}</span>
             <input
               value={subtitle}
               onChange={(event) => setSubtitle(event.target.value)}
@@ -195,7 +196,7 @@ export default function AdminIntakePanel() {
 
           <div className="grid gap-3 md:grid-cols-2">
             <label className="text-sm">
-              <span className="mb-1 block font-semibold text-[var(--primary)]">Owner</span>
+              <span className="mb-1 block font-semibold text-[var(--primary)]">{t("admin.owner")}</span>
               <input
                 value={owner}
                 onChange={(event) => setOwner(event.target.value)}
@@ -205,7 +206,7 @@ export default function AdminIntakePanel() {
             </label>
 
             <label className="text-sm">
-              <span className="mb-1 block font-semibold text-[var(--primary)]">URL / File Path</span>
+              <span className="mb-1 block font-semibold text-[var(--primary)]">{t("admin.urlFilePath")}</span>
               <input
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
@@ -220,7 +221,7 @@ export default function AdminIntakePanel() {
           </div>
 
           <label className="text-sm">
-            <span className="mb-1 block font-semibold text-[var(--primary)]">Notes</span>
+            <span className="mb-1 block font-semibold text-[var(--primary)]">{t("admin.notes")}</span>
             <textarea
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
@@ -239,7 +240,7 @@ export default function AdminIntakePanel() {
               disabled={loading}
               className="bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
             >
-              {loading ? "Saving..." : "Save Submission"}
+              {loading ? t("admin.saving") : t("admin.saveSubmission")}
             </button>
             {message ? <p className="text-sm font-semibold text-[var(--accent)]">{message}</p> : null}
             {error ? <p className="text-sm font-semibold text-red-600">{error}</p> : null}
@@ -248,7 +249,7 @@ export default function AdminIntakePanel() {
 
         <div className="border border-[var(--border)] bg-white/70 px-4 py-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-            Required Keys
+            {t("admin.requiredKeys")}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {templateByType[type].map((key) => (
@@ -259,21 +260,21 @@ export default function AdminIntakePanel() {
           </div>
 
           <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-            Preview Payload
+            {t("admin.previewPayload")}
           </p>
           <pre className="admin-json mt-2">{JSON.stringify(payload, null, 2)}</pre>
 
           <div className="mt-5 border-t border-[var(--border)] pt-4 text-sm text-[var(--muted)]">
-            <p className="font-semibold text-[var(--primary)]">Saved Queue</p>
+            <p className="font-semibold text-[var(--primary)]">{t("admin.savedQueue")}</p>
             {backend ? (
               <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-                Active backend: {backend}
+                {t("admin.activeBackend")}: {backend}
               </p>
             ) : null}
             {booting ? (
-              <p className="mt-2">Loading saved submissions...</p>
+              <p className="mt-2">{t("admin.loadingSaved")}</p>
             ) : submissions.length === 0 ? (
-              <p className="mt-2">No saved submissions yet.</p>
+              <p className="mt-2">{t("admin.noSaved")}</p>
             ) : (
               <ul className="mt-3 divide-y divide-[var(--border)] border-y border-[var(--border)]">
                 {submissions.slice(0, 8).map((submission) => (
@@ -287,7 +288,7 @@ export default function AdminIntakePanel() {
                           {submission.title}
                         </p>
                         <p className="mt-1 text-xs text-[var(--muted)]">
-                          {submission.owner ?? "No owner"} · {submission.dateLabel ?? "No date"}
+                          {submission.owner ?? t("admin.noOwner")} · {submission.dateLabel ?? t("admin.noDate")}
                         </p>
                       </div>
                       <span className="section-chip">{submission.status}</span>

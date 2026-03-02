@@ -2,11 +2,14 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { AICounselorInner } from "@/components/AICounselor";
+import { useI18n } from "@/components/LanguageProvider";
 import { archiveDataset, type ArchiveSection } from "@/lib/archiveData";
 
 const archiveSections = Object.keys(archiveDataset) as ArchiveSection[];
 
 export default function FloatingActionBar() {
+  const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const isArchive = pathname === "/archive";
@@ -15,8 +18,95 @@ export default function FloatingActionBar() {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [hideNearFooter, setHideNearFooter] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
 
   const [activeSection, setActiveSection] = useState<ArchiveSection | null>(null);
+  const archiveSectionFromPath = useMemo(() => {
+    if (!pathname.startsWith("/archive/")) return null;
+    const section = pathname.split("/")[2];
+    if (!section) return null;
+    return archiveSections.includes(section as ArchiveSection) ? (section as ArchiveSection) : null;
+  }, [pathname]);
+
+  const assistantConfig = useMemo(() => {
+    if (pathname === "/archive") {
+      return {
+        enabled: true,
+        context: "archive" as const,
+        title: t("floating.aiArchiveTitle"),
+        description: t("floating.aiArchiveDescription"),
+        presetPrompts: [
+          t("floating.aiArchivePrompt1"),
+          t("floating.aiArchivePrompt2"),
+          t("floating.aiArchivePrompt3"),
+        ],
+      };
+    }
+
+    if (pathname === "/links") {
+      return {
+        enabled: true,
+        context: "links" as const,
+        title: t("floating.aiLinksTitle"),
+        description: t("floating.aiLinksDescription"),
+        presetPrompts: [
+          t("floating.aiLinksPrompt1"),
+          t("floating.aiLinksPrompt2"),
+          t("floating.aiLinksPrompt3"),
+        ],
+      };
+    }
+
+    if (pathname === "/projects") {
+      return {
+        enabled: true,
+        context: "projects" as const,
+        title: t("floating.aiProjectsTitle"),
+        description: t("floating.aiProjectsDescription"),
+        presetPrompts: [
+          t("floating.aiProjectsPrompt1"),
+          t("floating.aiProjectsPrompt2"),
+          t("floating.aiProjectsPrompt3"),
+        ],
+      };
+    }
+
+    if (pathname === "/" || pathname === "/updates" || pathname.startsWith("/updates/")) {
+      return {
+        enabled: true,
+        context: "handbook" as const,
+        title: t("floating.aiHandbookTitle"),
+        description: t("floating.aiHandbookDescription"),
+        presetPrompts: [
+          t("floating.aiHandbookPrompt1"),
+          t("floating.aiHandbookPrompt2"),
+          t("floating.aiHandbookPrompt3"),
+        ],
+      };
+    }
+
+    if (pathname === "/me" || pathname.startsWith("/people/")) {
+      return {
+        enabled: false,
+        context: "handbook" as const,
+        title: "",
+        description: "",
+        presetPrompts: [],
+      };
+    }
+
+    return {
+      enabled: true,
+      context: "handbook" as const,
+      title: t("floating.aiHandbookTitle"),
+      description: t("floating.aiHandbookDescription"),
+      presetPrompts: [
+        t("floating.aiHandbookPrompt1"),
+        t("floating.aiHandbookPrompt2"),
+        t("floating.aiHandbookPrompt3"),
+      ],
+    };
+  }, [pathname, t]);
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -91,24 +181,47 @@ export default function FloatingActionBar() {
 
   return (
     <div className={`floating-wrap ${hideNearFooter ? "floating-wrap-hidden" : ""}`}>
+      <div className={`floating-assistant ${assistantConfig.enabled && assistantOpen ? "floating-assistant-open" : ""}`}>
+        <div className="floating-assistant-head">
+          <div>
+            <p className="section-cover-kicker">{t("floating.ai")}</p>
+            <h2 className="mt-2 text-xl font-black text-[var(--primary)]">{assistantConfig.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{assistantConfig.description}</p>
+          </div>
+          <button
+            type="button"
+            className="floating-btn"
+            onClick={() => setAssistantOpen(false)}
+          >
+            {t("floating.closeAi")}
+          </button>
+        </div>
+        <AICounselorInner
+          variant="panel"
+          context={assistantConfig.context}
+          archiveSection={isArchive ? activeSection : archiveSectionFromPath}
+          presetPrompts={assistantConfig.presetPrompts}
+        />
+      </div>
+
       <div className={`floating-search ${searchOpen ? "floating-search-open" : ""}`}>
         <form className="floating-search-form" onSubmit={onSubmitSearch}>
           <input
             ref={searchInputRef}
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
-            placeholder="Search archive..."
+            placeholder={t("floating.searchPlaceholder")}
             className="floating-search-input"
           />
           <button type="submit" className="floating-search-btn floating-search-btn-primary">
-            Go
+            {t("floating.go")}
           </button>
           <button
             type="button"
             className="floating-search-btn"
             onClick={() => setSearchOpen(false)}
           >
-            Cancel
+            {t("floating.cancel")}
           </button>
         </form>
       </div>
@@ -121,34 +234,47 @@ export default function FloatingActionBar() {
         <div className={`floating-main ${collapsed ? "floating-main-hidden" : ""}`}>
           <div className="floating-group floating-group-left">
             <button type="button" className="floating-btn" onClick={() => window.history.back()}>
-              Back
+              {t("floating.back")}
             </button>
             <button
               type="button"
               className="floating-btn"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             >
-              Top
+              {t("floating.top")}
             </button>
             <button
               type="button"
               className="floating-btn floating-btn-primary"
               onClick={() => setSearchOpen((prev) => !prev)}
             >
-              Search
+              {t("floating.search")}
             </button>
           </div>
 
           <div className="floating-group floating-group-center">
+            {assistantConfig.enabled ? (
+              <button
+                type="button"
+                className="floating-btn floating-btn-ai"
+                onClick={() => {
+                  setSearchOpen(false);
+                  setAssistantOpen((prev) => !prev);
+                }}
+              >
+                {t("floating.ai")}
+              </button>
+            ) : null}
             <button
               type="button"
               className="floating-btn floating-toggle floating-toggle-inline"
               onClick={() => {
                 setSearchOpen(false);
+                setAssistantOpen(false);
                 setCollapsed(true);
               }}
-              aria-label="Collapse quick actions"
-              title="Collapse quick actions"
+              aria-label={t("floating.collapse")}
+              title={t("floating.collapse")}
             >
               <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
                 <path
@@ -165,7 +291,7 @@ export default function FloatingActionBar() {
 
           <div className="floating-group floating-group-right">
             <button type="button" className="floating-btn" onClick={() => router.push("/links")}>
-              Links
+              {t("floating.links")}
             </button>
             <button
               type="button"
@@ -173,7 +299,7 @@ export default function FloatingActionBar() {
               onClick={() => moveSection(-1)}
               disabled={disablePrev}
             >
-              Prev
+              {t("floating.prev")}
             </button>
             <button
               type="button"
@@ -181,7 +307,7 @@ export default function FloatingActionBar() {
               onClick={() => moveSection(1)}
               disabled={disableNext}
             >
-              Next
+              {t("floating.next")}
             </button>
           </div>
         </div>
@@ -191,8 +317,8 @@ export default function FloatingActionBar() {
             type="button"
             className="floating-btn floating-toggle"
             onClick={() => setCollapsed(false)}
-            aria-label="Expand quick actions"
-            title="Expand quick actions"
+            aria-label={t("floating.expand")}
+            title={t("floating.expand")}
           >
             <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
               <path

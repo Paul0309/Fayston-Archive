@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
-import { mockProjects } from "@/lib/mockData";
+﻿import { NextResponse } from "next/server";
+import { getRuntimeArchiveSectionItems } from "@/lib/archiveAdminStore";
 
 export async function GET() {
-  return NextResponse.json(mockProjects);
+  return NextResponse.json(await getRuntimeArchiveSectionItems("projects"));
 }
-

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getOrCreatePersonalPageByUserId } from "@/lib/personalPage";
+import { ensureTranscriptDocumentExtensions, getOrCreatePersonalPageByUserId } from "@/lib/personalPage";
 import { saveTranscriptFile } from "@/lib/privateFiles";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -20,6 +20,10 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get("file");
   const titleInput = clean(formData.get("title"));
+  const academicYear = clean(formData.get("academicYear"));
+  const quarter = clean(formData.get("quarter"));
+  const gradeLevel = clean(formData.get("gradeLevel"));
+  const notes = clean(formData.get("notes"));
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "File is required" }, { status: 400 });
@@ -33,6 +37,8 @@ export async function POST(request: Request) {
   if (!user?.personalPage) {
     return NextResponse.json({ error: "Page not found" }, { status: 404 });
   }
+
+  await ensureTranscriptDocumentExtensions();
 
   const doc = await prisma.transcriptDocument.create({
     data: {
@@ -70,9 +76,23 @@ export async function POST(request: Request) {
     },
   });
 
+  await prisma.$executeRaw`
+    UPDATE "TranscriptDocument"
+    SET
+      "academicYear" = ${academicYear || null},
+      "quarter" = ${quarter || null},
+      "gradeLevelLabel" = ${gradeLevel || null},
+      "notes" = ${notes || null}
+    WHERE "id" = ${doc.id}
+  `;
+
   return NextResponse.json({
     document: {
       ...updated,
+      academicYear,
+      quarter,
+      gradeLevel,
+      notes,
       createdAt: updated.createdAt.toISOString(),
     },
   });

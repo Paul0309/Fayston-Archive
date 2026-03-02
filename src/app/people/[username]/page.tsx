@@ -2,7 +2,11 @@ import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import PersonalPageEditor from "@/components/PersonalPageEditor";
 import { authOptions } from "@/lib/auth";
-import { getOrCreatePersonalPageByUserId, serializePersonalPage } from "@/lib/personalPage";
+import {
+  attachPersonalProjects,
+  getOrCreatePersonalPageByUserId,
+  serializePersonalPage,
+} from "@/lib/personalPage";
 import { prisma } from "@/lib/prisma";
 import { isAdminRole } from "@/lib/roles";
 
@@ -36,7 +40,7 @@ export default async function PrivateUserPage({
   }
 
   const user = await getOrCreatePersonalPageByUserId(targetUser.id);
-  const payload = serializePersonalPage(user);
+  const payload = await attachPersonalProjects(serializePersonalPage(user), user?.personalPage?.id);
 
   if (!payload) {
     notFound();

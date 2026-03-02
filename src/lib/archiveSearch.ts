@@ -1,12 +1,14 @@
 import { archiveSectionMeta } from "@/lib/archiveMeta";
 import {
-  archiveSectionLabels,
+  getArchiveSectionLabel,
   getArchiveItemHref,
   getArchiveItemSummary,
   getArchiveItemTitle,
   getArchiveItemYear,
 } from "@/lib/archivePresentation";
 import { archiveDataset, type ArchiveSection } from "@/lib/archiveData";
+import type { Locale } from "@/lib/i18n";
+type ArchiveDatasetShape = typeof archiveDataset;
 
 export interface SearchResultItem {
   section: ArchiveSection;
@@ -44,16 +46,18 @@ function stringifyRecord(value: unknown): string {
 export function searchArchive(
   query: string,
   filters: ArchiveSearchFilters = {},
+  locale: Locale = "en",
+  dataset: ArchiveDatasetShape = archiveDataset,
 ): SearchResultItem[] {
   const q = query.trim().toLowerCase();
   if (!q && !filters.section && !filters.year && !filters.verification) return [];
 
   const results: SearchResultItem[] = [];
 
-  (Object.keys(archiveDataset) as ArchiveSection[]).forEach((section) => {
+  (Object.keys(dataset) as ArchiveSection[]).forEach((section) => {
     if (filters.section && filters.section !== section) return;
 
-    archiveDataset[section].forEach((rawItem) => {
+    dataset[section].forEach((rawItem) => {
       const item = rawItem as unknown as Record<string, unknown>;
       const text = stringifyRecord(item).toLowerCase();
       const year = getArchiveItemYear(
@@ -68,10 +72,10 @@ export function searchArchive(
 
       results.push({
         section,
-        sectionLabel: archiveSectionLabels[section],
+        sectionLabel: getArchiveSectionLabel(section, locale),
         id: Number(item.id),
-        title: getArchiveItemTitle(section, rawItem as never),
-        snippet: getArchiveItemSummary(section, rawItem as never),
+        title: getArchiveItemTitle(section, rawItem as never, locale),
+        snippet: getArchiveItemSummary(section, rawItem as never, locale),
         href: getArchiveItemHref(section, Number(item.id)),
         year,
         verification,

@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
+import { getRuntimeArchiveItemById } from "@/lib/archiveAdminStore";
 import { archiveSectionMeta } from "@/lib/archiveMeta";
+import { getServerLocale } from "@/lib/serverLocale";
 import {
-  archiveSectionLabels,
-  getArchiveItemById,
+  getArchiveSectionLabel,
   getArchiveItemFields,
   getArchiveItemSummary,
   getArchiveItemTitle,
@@ -14,6 +15,7 @@ interface RouteContext {
 }
 
 export async function GET(_request: Request, context: RouteContext) {
+  const locale = await getServerLocale();
   const { section: rawSection, id: rawId } = await context.params;
   if (!isArchiveSection(rawSection)) {
     return NextResponse.json({ error: "Unknown section" }, { status: 404 });
@@ -24,19 +26,19 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
 
-  const item = getArchiveItemById(rawSection, id);
+  const item = await getRuntimeArchiveItemById(rawSection, id);
   if (!item) {
     return NextResponse.json({ error: "Record not found" }, { status: 404 });
   }
 
   const meta = archiveSectionMeta[rawSection];
   const payload = {
-    section: archiveSectionLabels[rawSection],
+    section: getArchiveSectionLabel(rawSection, locale),
     id,
-    title: getArchiveItemTitle(rawSection, item),
-    summary: getArchiveItemSummary(rawSection, item),
+    title: getArchiveItemTitle(rawSection, item, locale),
+    summary: getArchiveItemSummary(rawSection, item, locale),
     meta,
-    fields: getArchiveItemFields(rawSection, item),
+    fields: getArchiveItemFields(rawSection, item, locale),
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

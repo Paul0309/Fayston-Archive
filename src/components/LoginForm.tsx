@@ -2,8 +2,11 @@
 
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
+import { useI18n } from "@/components/LanguageProvider";
+import { normalizePhoneNumber } from "@/lib/studentProfile";
 
 export default function LoginForm() {
+  const { t } = useI18n();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +25,7 @@ export default function LoginForm() {
     });
 
     if (result?.error) {
-      setError("Login failed.");
+      setError(t("auth.loginFailed"));
       setLoading(false);
     }
   }
@@ -30,22 +33,25 @@ export default function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="auth-form mt-6">
       <label className="auth-field">
-        <span>Identifier</span>
+        <span>{t("auth.identifier")}</span>
         <input
           value={identifier}
-          onChange={(event) => setIdentifier(event.target.value)}
-          placeholder="email / phone / username"
+          onChange={(event) => {
+            const value = event.target.value;
+            setIdentifier(/^(\+?\d[\d\s().-]*)$/.test(value) ? (normalizePhoneNumber(value) ?? "") : value);
+          }}
+          placeholder={t("auth.identifierPlaceholder")}
           className="archive-filter-input w-full"
         />
       </label>
 
       <label className="auth-field">
-        <span>Password</span>
+        <span>{t("auth.password")}</span>
         <input
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           type="password"
-          placeholder="Password"
+          placeholder={t("auth.passwordPlaceholder")}
           className="archive-filter-input w-full"
         />
       </label>
@@ -55,7 +61,7 @@ export default function LoginForm() {
         disabled={loading}
         className="bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
       >
-        {loading ? "Signing in..." : "Sign In"}
+        {loading ? t("auth.signingIn") : t("auth.signIn")}
       </button>
 
       {error ? <p className="auth-error">{error}</p> : null}

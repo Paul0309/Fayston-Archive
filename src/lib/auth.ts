@@ -7,6 +7,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { normalizeIdentity, resolveUserRole } from "@/lib/roles";
+import { normalizeEmail, normalizePhoneNumber, normalizeUsername } from "@/lib/studentProfile";
 
 const providers: NextAuthOptions["providers"] = [];
 
@@ -45,14 +46,22 @@ providers.push(
       password: { label: "Password", type: "password" },
     },
     async authorize(credentials) {
-      const identifier = normalizeIdentity(credentials?.identifier);
+      const rawIdentifier = credentials?.identifier ?? "";
+      const identifier = normalizeIdentity(rawIdentifier);
+      const normalizedEmail = normalizeEmail(rawIdentifier);
+      const normalizedUsername = normalizeUsername(rawIdentifier);
+      const normalizedPhone = normalizePhoneNumber(rawIdentifier);
       const password = credentials?.password ?? "";
 
       if (!identifier || !password) return null;
 
       const user = await prisma.user.findFirst({
         where: {
-          OR: [{ email: identifier }, { username: identifier }, { phone: identifier }],
+          OR: [
+            { email: normalizedEmail ?? identifier },
+            { username: normalizedUsername ?? identifier },
+            ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
+          ],
         },
       });
 

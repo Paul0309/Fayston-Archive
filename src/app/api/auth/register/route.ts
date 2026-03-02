@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { normalizeIdentity, resolveUserRole } from "@/lib/roles";
+import { resolveUserRole } from "@/lib/roles";
+import {
+  combineDisplayName,
+  deriveGradeLevelFromGraduationYear,
+  normalizeEmail,
+  normalizePhoneNumber,
+  normalizeUsername,
+} from "@/lib/studentProfile";
 
 interface RegisterBody {
-  name?: string;
+  koreanName?: string;
+  englishName?: string;
   username?: string;
   email?: string;
   phone?: string;
+  graduationYear?: string;
   password?: string;
+  confirmPassword?: string;
 }
 
 function clean(value?: string) {
@@ -18,17 +28,26 @@ function clean(value?: string) {
 
 export async function POST(request: Request) {
   const body = (await request.json()) as RegisterBody;
-  const name = clean(body.name);
-  const username = normalizeIdentity(clean(body.username));
-  const email = normalizeIdentity(clean(body.email));
-  const phone = normalizeIdentity(clean(body.phone));
+  const koreanName = clean(body.koreanName);
+  const englishName = clean(body.englishName);
+  const username = normalizeUsername(clean(body.username));
+  const email = normalizeEmail(clean(body.email));
+  const phone = normalizePhoneNumber(body.phone);
+  const graduationYear = clean(body.graduationYear);
   const password = body.password ?? "";
+  const confirmPassword = body.confirmPassword ?? "";
+  const displayName =
+    koreanName && englishName ? combineDisplayName(koreanName, englishName) : undefined;
 
-  if (!name || !username || !email || !phone || password.length < 8) {
+  if (!koreanName || !englishName || !username || !email || !phone || !graduationYear || password.length < 8) {
     return NextResponse.json(
-      { error: "name, username, email, phone, and password(8+) are required" },
+      { error: "Korean name, English name, username, email, phone, graduating year, and password(8+) are required" },
       { status: 400 },
     );
+  }
+
+  if (password !== confirmPassword) {
+    return NextResponse.json({ error: "Passwords do not match" }, { status: 400 });
   }
 
   const existing = await prisma.user.findFirst({
@@ -54,12 +73,18 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.create({
     data: {
-      name,
+      name: displayName,
       username,
       email,
       phone,
       role,
       passwordHash,
+      personalPage: {
+        create: {
+          graduationYear,
+          gradeLevel: deriveGradeLevelFromGraduationYear(graduationYear) || null,
+        },
+      },
     },
     select: {
       id: true,

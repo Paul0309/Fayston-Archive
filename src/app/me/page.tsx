@@ -2,7 +2,11 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import PersonalPageEditor from "@/components/PersonalPageEditor";
 import { authOptions } from "@/lib/auth";
-import { getOrCreatePersonalPageByUserId, serializePersonalPage } from "@/lib/personalPage";
+import {
+  attachPersonalProjects,
+  getOrCreatePersonalPageByUserId,
+  serializePersonalPage,
+} from "@/lib/personalPage";
 
 export default async function MyPage() {
   const session = await getServerSession(authOptions);
@@ -11,7 +15,7 @@ export default async function MyPage() {
   }
 
   const user = await getOrCreatePersonalPageByUserId(session.user.id);
-  const payload = serializePersonalPage(user);
+  const payload = await attachPersonalProjects(serializePersonalPage(user), user?.personalPage?.id);
 
   if (!payload) {
     redirect("/");
